@@ -30,7 +30,7 @@
                 <ul class="module-functions">
                     <li>Cambiar nombre</li>
                     <li>Editar información de restaurante</li>
-                    <li>Logo</li>
+                    <li>Crear database</li>
                 </ul>
             </div>
             <!-- Gestión de Usuarios -->
@@ -220,6 +220,15 @@
     <script>
         // Configuración de módulos y sus funciones PHP correspondientes
         const moduleConfig = {
+             restaurantes: {
+        title: 'Gestión de Restaurantes',
+        icon: 'fas fa-users',
+        functions: [
+            { file: 'registrar_datos_local.php', name: 'Registrar datos', desc: 'Crear local en la base de datos' },
+            { file: 'obtener_datos_local.php', name: 'Obtener datos', desc: 'Obtener los datos del local' },
+            { file: 'crear_tablas.php', name: 'Crear Tablas', desc: 'Crear tablas del local' }
+        ]
+            },
             usuarios: {
                 title: 'Gestión de Usuarios',
                 icon: 'fas fa-users',
