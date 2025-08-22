@@ -82,6 +82,7 @@
             color: white;
         }
 
+        .restaurantes .module-icon { background: #c8ff00; }
         .usuarios .module-icon { background: #4CAF50; }
         .categorias .module-icon { background: #2196F3; }
         .insumos .module-icon { background: #FF9800; }
