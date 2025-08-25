@@ -5,8 +5,282 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión de Restaurante</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="estilos/styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .module-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .module-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .module-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 24px;
+            color: white;
+        }
+
+        .usuarios .module-icon { background: linear-gradient(45deg, #4CAF50, #45a049); }
+        .categorias .module-icon { background: linear-gradient(45deg, #2196F3, #1976D2); }
+        .insumos .module-icon { background: linear-gradient(45deg, #FF9800, #F57C00); }
+        .mesas .module-icon { background: linear-gradient(45deg, #9C27B0, #7B1FA2); }
+        .ventas .module-icon { background: linear-gradient(45deg, #F44336, #D32F2F); }
+        .reportes .module-icon { background: linear-gradient(45deg, #00BCD4, #0097A7); }
+        .configuracion .module-icon { background: linear-gradient(45deg, #607D8B, #455A64); }
+        .seguridad .module-icon { background: linear-gradient(45deg, #795548, #5D4037); }
+        .restaurantes .module-icon { background: linear-gradient(45deg, #E91E63, #C2185B); }
+
+        .module-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .module-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .module-functions {
+            list-style: none;
+        }
+
+        .module-functions li {
+            padding: 5px 0;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .module-functions li:before {
+            content: "✓ ";
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .quick-actions h3 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .function-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .function-item {
+            padding: 20px;
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .function-item:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .function-item h4 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .function-item p {
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 10001;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.success { background: #4CAF50; }
+        .notification.error { background: #F44336; }
+        .notification.info { background: #2196F3; }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -16,11 +290,11 @@
         </div>
 
         <div class="dashboard-grid">
-                        <!-- Gestión de Restaurante -->
+            <!-- Gestión de Restaurante -->
             <div class="module-card restaurantes" onclick="openModal('restaurantes')">
                 <div class="module-header">
                     <div class="module-icon">
-                        <i class="fas fa-users"></i>
+                        <i class="fas fa-store"></i>
                     </div>
                     <div class="module-title">Gestión de Restaurantes</div>
                 </div>
@@ -30,9 +304,10 @@
                 <ul class="module-functions">
                     <li>Cambiar nombre</li>
                     <li>Editar información de restaurante</li>
-                    <li>Crear database</li>
+                    <li>Logo</li>
                 </ul>
             </div>
+            
             <!-- Gestión de Usuarios -->
             <div class="module-card usuarios" onclick="openModal('usuarios')">
                 <div class="module-header">
@@ -220,94 +495,92 @@
     <script>
         // Configuración de módulos y sus funciones PHP correspondientes
         const moduleConfig = {
-             restaurantes: {
-        title: 'Gestión de Restaurantes',
-        icon: 'fas fa-users',
-        functions: [
-            { file: 'registrar_datos_local.php', name: 'Registrar datos', desc: 'Crear local en la base de datos' },
-            { file: 'obtener_datos_local.php', name: 'Obtener datos', desc: 'Obtener los datos del local' },
-            { file: 'crear_tablas.php', name: 'Crear Tablas', desc: 'Crear tablas del local' }
-        ]
+            restaurantes: {
+                title: 'Gestión de Restaurantes',
+                icon: 'fas fa-store',
+                functions: [
+                    { file: 'api/obtener_datos_local.php', name: 'Ver Datos del Restaurante', desc: 'Consultar información actual del restaurante' },
+                    { file: 'api/registrar_datos_local.php', name: 'Actualizar Información', desc: 'Modificar datos del restaurante' }
+                ]
             },
             usuarios: {
                 title: 'Gestión de Usuarios',
                 icon: 'fas fa-users',
                 functions: [
-                    { file: 'registrar_usuario.php', name: 'Registrar Usuario', desc: 'Crear nuevos usuarios en el sistema' },
-                    { file: 'editar_usuario.php', name: 'Editar Usuario', desc: 'Modificar información de usuarios existentes' },
-                    { file: 'eliminar_usuario.php', name: 'Eliminar Usuario', desc: 'Eliminar usuarios del sistema' },
-                    { file: 'obtener_usuario_id.php', name: 'Obtener Usuario por ID', desc: 'Buscar usuario específico por ID' },
-                    { file: 'obtener_usuarios.php', name: 'Listar Usuarios', desc: 'Obtener lista completa de usuarios' },
-                    { file: 'cambiar_password.php', name: 'Cambiar Contraseña', desc: 'Actualizar contraseñas de usuarios' }
+                    { file: 'api/registrar_usuario.php', name: 'Registrar Usuario', desc: 'Crear nuevos usuarios en el sistema' },
+                    { file: 'api/editar_usuario.php', name: 'Editar Usuario', desc: 'Modificar información de usuarios existentes' },
+                    { file: 'api/eliminar_usuario.php', name: 'Eliminar Usuario', desc: 'Eliminar usuarios del sistema' },
+                    { file: 'api/obtener_usuario_id.php', name: 'Obtener Usuario por ID', desc: 'Buscar usuario específico por ID' },
+                    { file: 'api/obtener_usuarios.php', name: 'Listar Usuarios', desc: 'Obtener lista completa de usuarios' },
+                    { file: 'api/cambiar_password.php', name: 'Cambiar Contraseña', desc: 'Actualizar contraseñas de usuarios' }
                 ]
             },
             categorias: {
                 title: 'Gestión de Categorías',
                 icon: 'fas fa-tags',
                 functions: [
-                    { file: 'registrar_categoria.php', name: 'Registrar Categoría', desc: 'Crear nuevas categorías de productos' },
-                    { file: 'editar_categoria.php', name: 'Editar Categoría', desc: 'Modificar categorías existentes' },
-                    { file: 'eliminar_categoria.php', name: 'Eliminar Categoría', desc: 'Eliminar categorías del sistema' },
-                    { file: 'obtener_categorias.php', name: 'Listar Categorías', desc: 'Obtener todas las categorías' },
-                    { file: 'obtener_categorias_tipo.php', name: 'Categorías por Tipo', desc: 'Filtrar categorías por tipo específico' }
+                    { file: 'api/registrar_categoria.php', name: 'Registrar Categoría', desc: 'Crear nuevas categorías de productos' },
+                    { file: 'api/editar_categoria.php', name: 'Editar Categoría', desc: 'Modificar categorías existentes' },
+                    { file: 'api/eliminar_categoria.php', name: 'Eliminar Categoría', desc: 'Eliminar categorías del sistema' },
+                    { file: 'api/obtener_categorias.php', name: 'Listar Categorías', desc: 'Obtener todas las categorías' },
+                    { file: 'api/obtener_categorias_tipo.php', name: 'Categorías por Tipo', desc: 'Filtrar categorías por tipo específico' }
                 ]
             },
             insumos: {
                 title: 'Gestión de Inventario',
                 icon: 'fas fa-boxes',
                 functions: [
-                    { file: 'registrar_insumo.php', name: 'Registrar Insumo', desc: 'Agregar nuevos productos al inventario' },
-                    { file: 'editar_insumo.php', name: 'Editar Insumo', desc: 'Actualizar información de productos' },
-                    { file: 'eliminar_insumo.php', name: 'Eliminar Insumo', desc: 'Eliminar productos del inventario' },
-                    { file: 'obtener_insumo_id.php', name: 'Buscar por ID', desc: 'Encontrar producto específico por ID' },
-                    { file: 'obtener_insumo_nombre.php', name: 'Buscar por Nombre', desc: 'Encontrar producto por nombre' },
-                    { file: 'obtener_insumos.php', name: 'Listar Insumos', desc: 'Ver todo el inventario disponible' }
+                    { file: 'api/registrar_insumo.php', name: 'Registrar Insumo', desc: 'Agregar nuevos productos al inventario' },
+                    { file: 'api/editar_insumo.php', name: 'Editar Insumo', desc: 'Actualizar información de productos' },
+                    { file: 'api/eliminar_insumo.php', name: 'Eliminar Insumo', desc: 'Eliminar productos del inventario' },
+                    { file: 'api/obtener_insumo_id.php', name: 'Buscar por ID', desc: 'Encontrar producto específico por ID' },
+                    { file: 'api/obtener_insumo_nombre.php', name: 'Buscar por Nombre', desc: 'Encontrar producto por nombre' },
+                    { file: 'api/obtener_insumos.php', name: 'Listar Insumos', desc: 'Ver todo el inventario disponible' }
                 ]
             },
             mesas: {
                 title: 'Gestión de Mesas',
                 icon: 'fas fa-chair',
                 functions: [
-                    { file: 'editar_mesa.php', name: 'Editar Mesa', desc: 'Modificar configuración de mesas' },
-                    { file: 'cancelar_mesa.php', name: 'Cancelar Reserva', desc: 'Cancelar reservaciones de mesa' },
-                    { file: 'ocupar_mesa.php', name: 'Ocupar Mesa', desc: 'Marcar mesa como ocupada' },
-                    { file: 'obtener_mesas.php', name: 'Estado de Mesas', desc: 'Ver estado actual de todas las mesas' }
+                    { file: 'api/editar_mesa.php', name: 'Editar Mesa', desc: 'Modificar configuración de mesas' },
+                    { file: 'api/cancelar_mesa.php', name: 'Cancelar Reserva', desc: 'Cancelar reservaciones de mesa' },
+                    { file: 'api/ocupar_mesa.php', name: 'Ocupar Mesa', desc: 'Marcar mesa como ocupada' },
+                    { file: 'api/obtener_mesas.php', name: 'Estado de Mesas', desc: 'Ver estado actual de todas las mesas' }
                 ]
             },
             ventas: {
                 title: 'Sistema de Ventas',
                 icon: 'fas fa-cash-register',
                 functions: [
-                    { file: 'registrar_venta.php', name: 'Registrar Venta', desc: 'Procesar nueva venta/orden' },
-                    { file: 'obtener_ventas.php', name: 'Consultar Ventas', desc: 'Ver historial de ventas' },
-                    { file: 'registrar_datos_local.php', name: 'Datos Locales', desc: 'Registrar información local del negocio' }
+                    { file: 'api/registrar_venta.php', name: 'Registrar Venta', desc: 'Procesar nueva venta/orden' },
+                    { file: 'api/obtener_ventas.php', name: 'Consultar Ventas', desc: 'Ver historial de ventas' }
                 ]
             },
             reportes: {
                 title: 'Reportes y Análisis',
                 icon: 'fas fa-chart-line',
                 functions: [
-                    { file: 'obtener_datos_local.php', name: 'Datos del Local', desc: 'Información general del restaurante' },
-                    { file: 'perfil.php', name: 'Perfiles', desc: 'Gestión de perfiles de usuario' }
+                    { file: 'api/obtener_datos_local.php', name: 'Datos del Local', desc: 'Información general del restaurante' },
+                    { file: 'api/perfil.php', name: 'Perfiles', desc: 'Gestión de perfiles de usuario' }
                 ]
             },
             configuracion: {
                 title: 'Configuración del Sistema',
                 icon: 'fas fa-cog',
                 functions: [
-                    { file: 'funciones.php', name: 'Funciones del Sistema', desc: 'Funciones generales y utilidades' },
-                    { file: 'crear_tablas.php', name: 'Crear Tablas', desc: 'Inicializar estructura de base de datos' },
-                    { file: 'inicio.php', name: 'Página de Inicio', desc: 'Configuración de página principal' }
+                    { file: 'api/funciones.php', name: 'Funciones del Sistema', desc: 'Funciones generales y utilidades' },
+                    { file: 'api/crear_tablas.php', name: 'Crear Tablas', desc: 'Inicializar estructura de base de datos' },
+                    { file: 'api/inicio.php', name: 'Página de Inicio', desc: 'Configuración de página principal' }
                 ]
             },
             seguridad: {
                 title: 'Seguridad y Autenticación',
                 icon: 'fas fa-shield-alt',
                 functions: [
-                    { file: 'iniciar_sesion.php', name: 'Iniciar Sesión', desc: 'Autenticación de usuarios' },
-                    { file: 'verificar_password.php', name: 'Verificar Contraseña', desc: 'Validación de credenciales' },
-                    { file: 'encabezado.php', name: 'Encabezado Seguro', desc: 'Headers de seguridad HTTP' },
-                    { file: 'verificar_tablas.php', name: 'Verificar Tablas', desc: 'Validar integridad de base de datos' }
+                    { file: 'api/iniciar_sesion.php', name: 'Iniciar Sesión', desc: 'Autenticación de usuarios' },
+                    { file: 'api/verificar_password.php', name: 'Verificar Contraseña', desc: 'Validación de credenciales' },
+                    { file: 'api/encabezado.php', name: 'Encabezado Seguro', desc: 'Headers de seguridad HTTP' },
+                    { file: 'api/verificar_tablas.php', name: 'Verificar Tablas', desc: 'Validar integridad de base de datos' }
                 ]
             }
         };
@@ -349,6 +622,8 @@
                 openForm('registrarCategoria');
             } else if (phpFile.includes('registrar_insumo')) {
                 openForm('registrarInsumo');
+            } else if (phpFile.includes('registrar_datos_local')) {
+                openForm('registrarDatosLocal');
             } else if (phpFile.includes('obtener_')) {
                 openDataView(phpFile);
             } else {
@@ -509,6 +784,41 @@
                             </div>
                         </form>
                     `
+                },
+                registrarDatosLocal: {
+                    title: '<i class="fas fa-store"></i> Actualizar Datos del Restaurante',
+                    content: `
+                        <form id="registrarDatosLocalForm" onsubmit="submitForm(event, 'registrar_datos_local.php')">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Nombre del Restaurante:</label>
+                                <input type="text" name="nombre_restaurante" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Dirección:</label>
+                                <input type="text" name="direccion" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Teléfono:</label>
+                                <input type="tel" name="telefono" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Email:</label>
+                                <input type="email" name="email" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Horario de Atención:</label>
+                                <input type="text" name="horario" placeholder="Ej: Lunes a Domingo 8:00 AM - 10:00 PM" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" style="flex: 1; padding: 12px; background: #E91E63; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    <i class="fas fa-save"></i> Actualizar Información
+                                </button>
+                                <button type="button" onclick="closeModal()" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    `
                 }
             };
 
@@ -537,58 +847,141 @@
                 </div>
             `;
             modal.style.display = 'block';
+            
+            // Auto-ejecutar la función
+            executePhpFunction(phpFile);
         }
 
         function submitForm(event, phpFile) {
             event.preventDefault();
             
             const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData.entries());
             
-            // Mostrar los datos que se enviarían
-            console.log('Datos a enviar:', data);
+            // Mostrar indicador de carga
+            showNotification('Enviando datos...', 'info');
             
-            // Simular envío exitoso
-            showSuccess(`Datos enviados correctamente a ${phpFile}`);
-            
-            // Aquí harías la llamada real a PHP:
-            
-            fetch(`api/${phpFile}`, {
+            // Hacer la petición AJAX con FormData (como espera PHP)
+            fetch(phpFile, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
+                body: formData
             })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    showSuccess('Operación completada exitosamente');
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(data => {
+                // Intentar parsear como JSON
+                let result;
+                try {
+                    result = JSON.parse(data);
+                } catch(e) {
+                    // Si no es JSON, crear objeto de respuesta
+                    result = {
+                        success: data.includes('exitoso') || data.includes('success') || data.includes('completado'),
+                        message: data
+                    };
+                }
+                
+                if (result.success || result.status === 'success') {
+                    showNotification('✅ Operación completada exitosamente', 'success');
                     closeModal();
                 } else {
-                    showError(result.message || 'Error en la operación');
+                    showNotification('❌ Error: ' + (result.message || result.error || 'Error desconocido'), 'error');
                 }
             })
             .catch(error => {
-                showError('Error de conexión: ' + error.message);
+                showNotification('❌ Error de conexión: ' + error.message, 'error');
+                console.error('Error:', error);
             });
-            
         }
 
         function executePhpFunction(phpFile) {
-            showInfo(`Ejecutando: ${phpFile}\n\nRuta completa: api/${phpFile}\n\nEn producción, esto se conectaría directamente con tu archivo PHP.`);
-        }
+            showNotification('Ejecutando ' + phpFile + '...', 'info');
+            
+            fetch(phpFile, {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(data => {
+                const modal = document.getElementById('moduleModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalContent = document.getElementById('modalContent');
 
-        function showSuccess(message) {
-            showNotification(message, 'success');
-        }
+                modalTitle.innerHTML = `<i class="fas fa-database"></i> Resultado de ${phpFile}`;
+                
+                // Intentar parsear como JSON para mostrar mejor formato
+                let displayData = data;
+                try {
+                    const jsonData = JSON.parse(data);
+                    displayData = JSON.stringify(jsonData, null, 2);
+                } catch(e) {
+                    // Si no es JSON válido, mostrar como texto con formato
+                    displayData = data;
+                }
+                
+                modalContent.innerHTML = `
+                    <div style="margin-bottom: 15px;">
+                        <button onclick="executePhpFunction('${phpFile}')" style="padding: 8px 15px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                            <i class="fas fa-refresh"></i> Actualizar
+                        </button>
+                        <button onclick="closeModal()" style="padding: 8px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            <i class="fas fa-times"></i> Cerrar
+                        </button>
+                    </div>
+                    <div style="background:#f8f9fa; padding:20px; border-radius:8px; 
+                               max-height:500px; overflow:auto; 
+                               border: 1px solid #e9ecef; font-size: 13px; line-height: 1.4;">
+                        <pre style="margin: 0; white-space: pre-wrap; font-family: 'Courier New', monospace;">${displayData}</pre>
+                    </div>
+                `;
+                modal.style.display = 'block';
+                
+                showNotification('✅ Función ejecutada correctamente', 'success');
+            })
+            .catch(error => {
+                showNotification('❌ Error ejecutando ' + phpFile + ': ' + error.message, 'error');
+                console.error('Error:', error);
+                
+                // Mostrar error en modal también
+                const modal = document.getElementById('moduleModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalContent = document.getElementById('modalContent');
 
-        function showError(message) {
-            showNotification(message, 'error');
-        }
-
-        function showInfo(message) {
-            showNotification(message, 'info');
+                modalTitle.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Error - ${phpFile}`;
+                modalContent.innerHTML = `
+                    <div style="padding: 20px; text-align: center;">
+                        <div style="color: #dc3545; margin-bottom: 15px;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 2rem;"></i>
+                        </div>
+                        <h4 style="color: #dc3545; margin-bottom: 10px;">Error de Conexión</h4>
+                        <p><strong>Archivo:</strong> ${phpFile}</p>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; text-align: left;">
+                            <h5>Posibles soluciones:</h5>
+                            <ul style="margin-left: 20px;">
+                                <li>Verificar que el archivo PHP existe en la ruta correcta</li>
+                                <li>Comprobar que el servidor web esté ejecutándose</li>
+                                <li>Revisar permisos de archivo</li>
+                                <li>Verificar sintaxis del archivo PHP</li>
+                            </ul>
+                        </div>
+                        <button onclick="executePhpFunction('${phpFile}')" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 10px;">
+                            <i class="fas fa-retry"></i> Reintentar
+                        </button>
+                    </div>
+                `;
+                modal.style.display = 'block';
+            });
         }
 
         function showNotification(message, type) {
@@ -599,27 +992,15 @@
             };
 
             const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${colors[type]};
-                color: white;
-                padding: 15px 20px;
-                border-radius: 5px;
-                z-index: 10000;
-                max-width: 300px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                font-size: 14px;
-                line-height: 1.4;
-            `;
+            notification.className = `notification ${type}`;
+            notification.style.background = colors[type];
             notification.textContent = message;
             
             document.body.appendChild(notification);
             
             setTimeout(() => {
                 notification.remove();
-            }, 4000);
+            }, 5000);
         }
 
         function closeModal() {
@@ -640,11 +1021,9 @@
             }
         }
 
-        // Cerrar modal
-        document.querySelector('.close').onclick = function() {
-            closeModal();
-        }
-
+        // Event listeners
+        document.querySelector('.close').onclick = closeModal;
+        
         window.onclick = function(event) {
             const modal = document.getElementById('moduleModal');
             if (event.target == modal) {
@@ -666,28 +1045,5 @@
             });
         });
     </script>
-    <script>
-function executePhpFunction(phpFile) {
-    fetch(`api/${phpFile}`)
-        .then(response => response.text())
-        .then(data => {
-            const modal = document.getElementById('moduleModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent');
-
-            modalTitle.innerHTML = `<i class="fas fa-database"></i> Resultado de ${phpFile}`;
-            modalContent.innerHTML = `
-                <pre style="background:#f9f9f9; padding:15px; border-radius:5px;
-                           max-height:400px; overflow:auto; white-space: pre-wrap;">
-                    ${data}
-                </pre>`;
-            modal.style.display = 'block';
-        })
-        .catch(error => {
-            showError('❌ Error ejecutando ' + phpFile + ': ' + error.message);
-        });
-}
-</script>
-
 </body>
 </html>
