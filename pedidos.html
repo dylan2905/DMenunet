@@ -39,7 +39,8 @@
                     </ul>
                 <div class="card p-3">
                     <p class="mb-2">**Total:** $<span id="total-pedido">0.00</span></p>
-                    <button class="btn btn-success"><i class="bi bi-cart-fill me-2"></i>Finalizar Pedido</button>
+                    <button id="finalizar-pedido-btn" class="btn btn-success"><i class="bi bi-cart-fill me-2"></i>Finalizar Pedido</button>
+                    <div id="alert-container" class="mt-3"></div>
                 </div>
             </div>
         </div>
@@ -56,8 +57,19 @@
             const categoriasList = document.getElementById('categorias-list');
             const productosGrid = document.getElementById('productos-grid');
             const productosLoading = document.getElementById('productos-loading');
+            const pedidoList = document.getElementById('pedido-list');
+            const totalElement = document.getElementById('total-pedido');
+            const finalizarPedidoBtn = document.getElementById('finalizar-pedido-btn');
+            const alertContainer = document.getElementById('alert-container');
+            let total = 0;
 
-            // Cargar categorías desde la API
+            const showAlert = (message, type) => {
+                alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                                                ${message}
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                            </div>`;
+            };
+
             async function cargarCategorias() {
                 try {
                     const response = await fetch('./api/obtener_categorias.php');
@@ -76,7 +88,6 @@
                         categoriasList.appendChild(btn);
                     });
 
-                    // Cargar productos de la primera categoría por defecto
                     if (categorias.length > 0) {
                         cargarProductos(categorias[0].id);
                         categoriasList.querySelector('button').classList.add('active');
@@ -88,22 +99,19 @@
                 }
             }
 
-            // Cargar productos por categoría desde la API
             async function cargarProductos(categoriaId) {
                 productosGrid.innerHTML = '';
                 productosLoading.classList.remove('d-none');
 
-                // Quitar 'active' de todas las categorías y agregar a la seleccionada
                 document.querySelectorAll('.list-group-item').forEach(btn => btn.classList.remove('active'));
                 document.querySelector(`[data-categoria-id='${categoriaId}']`).classList.add('active');
 
                 try {
-                    // Nota: Esta API no existe aún, tendrás que crearla.
                     const response = await fetch(`./api/obtener_insumos.php?categoria_id=${categoriaId}`);
                     if (!response.ok) throw new Error('Error al cargar productos');
                     const productos = await response.json();
 
-                    productosGrid.innerHTML = ''; // Limpiar productos anteriores
+                    productosGrid.innerHTML = '';
                     if (productos.length === 0) {
                         productosGrid.innerHTML = '<div class="col-12"><p class="text-muted">No hay productos en esta categoría.</p></div>';
                         return;
@@ -133,11 +141,7 @@
                 }
             }
 
-            // Lógica para agregar productos al pedido (sin cambios)
-            const pedidoList = document.getElementById('pedido-list');
-            const totalElement = document.getElementById('total-pedido');
-            let total = 0;
-
+            // Lógica para agregar productos al pedido
             productosGrid.addEventListener('click', (e) => {
                 const addButton = e.target.closest('.add-to-order-btn');
                 if (!addButton) return;
@@ -145,8 +149,9 @@
                 const card = addButton.closest('.product-card');
                 const nombre = card.querySelector('.card-title').textContent;
                 const precio = parseFloat(card.dataset.precio);
+                const id = card.dataset.productoId;
 
-                const itemExistente = Array.from(pedidoList.children).find(item => item.dataset.nombre === nombre);
+                const itemExistente = Array.from(pedidoList.children).find(item => item.dataset.id === id);
 
                 if (itemExistente) {
                     const cantidadSpan = itemExistente.querySelector('.item-cantidad');
@@ -157,7 +162,7 @@
                 } else {
                     const listItem = document.createElement('li');
                     listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
-                    listItem.dataset.nombre = nombre;
+                    listItem.dataset.id = id;
                     listItem.dataset.precio = precio;
                     listItem.dataset.cantidad = 1;
                     listItem.innerHTML = `
@@ -172,6 +177,52 @@
 
                 total += precio;
                 totalElement.textContent = total.toFixed(2);
+            });
+            
+            finalizarPedidoBtn.addEventListener('click', async () => {
+                if (total <= 0) {
+                    showAlert('El pedido está vacío. Agrega productos para finalizar.', 'warning');
+                    return;
+                }
+
+                const pedido = [];
+                Array.from(pedidoList.children).forEach(item => {
+                    pedido.push({
+                        id: parseInt(item.dataset.id),
+                        cantidad: parseInt(item.dataset.cantidad),
+                        precio: parseFloat(item.dataset.precio)
+                    });
+                });
+
+                const datosParaEnviar = {
+                    mesa_id: mesaId,
+                    pedido: pedido
+                };
+
+                try {
+                    const response = await fetch('./api/registrar_venta.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(datosParaEnviar)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        showAlert('¡Pedido finalizado y registrado con éxito!', 'success');
+                        // Opcional: Redirigir al usuario de vuelta a la página de mesas
+                        setTimeout(() => {
+                            window.location.href = 'mesas.html';
+                        }, 2000); 
+                    } else {
+                        throw new Error(result.error || 'Error desconocido al registrar el pedido');
+                    }
+                } catch (error) {
+                    showAlert(`Hubo un problema: ${error.message}`, 'danger');
+                    console.error('Error al finalizar el pedido:', error);
+                }
             });
 
             // Iniciar la carga de categorías

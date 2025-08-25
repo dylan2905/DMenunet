@@ -1,0 +1,343 @@
+<?php include_once "verificar_sesion.php"; ?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - DMENUNET</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { border-radius: 1rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .kpi-card h4 { font-size: 1.25rem; }
+        .kpi-card h2 { font-size: 2.5rem; font-weight: 700; }
+        .filter-section { background-color: #ffffff; border-radius: 1rem; padding: 2rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); }
+        .chart-container { height: 300px; }
+        @media (min-width: 992px) { .chart-container { height: 400px; } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html"><i class="bi bi-house me-2"></i>Inicio</a>
+            <span class="navbar-text">Dashboard de Ventas</span>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-5">
+        <h1 class="mb-4 text-center">Analíticas de Venta</h1>
+        
+        <div class="filter-section mb-5">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="fecha-inicio" class="form-label">Fecha de Inicio</label>
+                    <input type="date" class="form-control" id="fecha-inicio">
+                </div>
+                <div class="col-md-3">
+                    <label for="fecha-fin" class="form-label">Fecha de Fin</label>
+                    <input type="date" class="form-control" id="fecha-fin">
+                </div>
+                <div class="col-md-3">
+                    <label for="mesero-filtro" class="form-label">Mesero</label>
+                    <select class="form-select" id="mesero-filtro">
+                        <option value="">Todos los Meseros</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="periodo-filtro" id="periodo-dia" value="dia" checked>
+                        <label class="btn btn-outline-primary" for="periodo-dia">Día</label>
+                        <input type="radio" class="btn-check" name="periodo-filtro" id="periodo-semana" value="semana">
+                        <label class="btn btn-outline-primary" for="periodo-semana">Semana</label>
+                        <input type="radio" class="btn-check" name="periodo-filtro" id="periodo-mes" value="mes">
+                        <label class="btn btn-outline-primary" for="periodo-mes">Mes</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3 mt-3">
+    <div class="col-md-6 d-grid">
+        <button class="btn btn-primary" id="aplicar-filtros-btn"><i class="bi bi-funnel me-2"></i>Aplicar Filtros</button>
+    </div>
+    <div class="col-md-6 d-grid">
+        <a id="generar-reporte-btn" class="btn btn-success" href="api/generar_reporte.php"><i class="bi bi-file-earmark-pdf-fill me-2"></i>Generar Reporte PDF</a>
+    </div>
+</div>
+
+        <div class="row text-center mb-5 g-4">
+            <div class="col-md-4">
+                <div class="card kpi-card bg-primary text-white p-4">
+                    <h4 class="card-title">Ventas Totales</h4>
+                    <h2 id="ventas-totales">$0.00</h2>
+                    <p class="card-text">Total de ingresos en el periodo.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card kpi-card bg-success text-white p-4">
+                    <h4 class="card-title">Ticket Promedio</h4>
+                    <h2 id="ticket-promedio">$0.00</h2>
+                    <p class="card-text">Promedio por cada venta pagada.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card kpi-card bg-danger text-white p-4">
+                    <h4 class="card-title">Ventas Anuladas</h4>
+                    <h2 id="ventas-anuladas">0</h2>
+                    <p class="card-text">Total de ventas canceladas.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card p-4">
+                    <h5 class="card-title">Ventas en el Tiempo</h5>
+                    <div class="chart-container"><canvas id="ventasChart"></canvas></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card p-4">
+                    <h5 class="card-title">Ventas por Mesero</h5>
+                    <div class="chart-container"><canvas id="ventasMeseroChart"></canvas></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card p-4">
+                    <h5 class="card-title">Top 5 Productos Más Vendidos</h5>
+                    <div class="chart-container"><canvas id="topProductosChart"></canvas></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card p-4">
+                    <h5 class="card-title">Ventas por Categoría</h5>
+                    <div class="chart-container"><canvas id="ventasCategoriaChart"></canvas></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card p-4">
+                    <h5 class="card-title">Ventas por Día de la Semana</h5>
+                    <div class="chart-container"><canvas id="ventasDiaSemanaChart"></canvas></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card p-4">
+                    <h5 class="card-title">Ventas por Hora del Día</h5>
+                    <div class="chart-container"><canvas id="ventasHoraChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let ventasChart, topProductosChart, ventasMeseroChart, ventasCategoriaChart, ventasDiaSemanaChart, ventasHoraChart;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const fechaInicioInput = document.getElementById('fecha-inicio');
+            const fechaFinInput = document.getElementById('fecha-fin');
+            const meseroFiltroSelect = document.getElementById('mesero-filtro');
+            const aplicarFiltrosBtn = document.getElementById('aplicar-filtros-btn');
+
+            const ventasTotalesSpan = document.getElementById('ventas-totales');
+            const ticketPromedioSpan = document.getElementById('ticket-promedio');
+            const ventasAnuladasSpan = document.getElementById('ventas-anuladas');
+            
+            // Establecer fechas por defecto
+            const hoy = new Date();
+            const hace30Dias = new Date(hoy);
+            hace30Dias.setDate(hoy.getDate() - 30);
+            fechaFinInput.value = hoy.toISOString().split('T')[0];
+            fechaInicioInput.value = hace30Dias.toISOString().split('T')[0];
+
+            // Cargar meseros
+            async function cargarMeseros() {
+                try {
+                    const response = await fetch('./api/obtener_meseros.php');
+                    const meseros = await response.json();
+                    meseros.forEach(mesero => {
+                        const option = document.createElement('option');
+                        option.value = mesero.id;
+                        option.textContent = mesero.nombre;
+                        meseroFiltroSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error al cargar los meseros:', error);
+                }
+            }
+
+            async function cargarDashboard() {
+                const fechaInicio = fechaInicioInput.value;
+                const fechaFin = fechaFinInput.value;
+                const meseroId = meseroFiltroSelect.value;
+                const periodo = document.querySelector('input[name="periodo-filtro"]:checked').value;
+                
+                try {
+                    const url = new URL('./api/dashboard_data.php', window.location.href);
+                    if (fechaInicio) url.searchParams.append('fecha_inicio', fechaInicio);
+                    if (fechaFin) url.searchParams.append('fecha_fin', fechaFin);
+                    if (meseroId) url.searchParams.append('mesero_id', meseroId);
+                    if (periodo) url.searchParams.append('periodo', periodo);
+
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (!response.ok || data.success === false) {
+                        throw new Error(data.message || 'Error al cargar los datos.');
+                    }
+
+                    // Actualizar KPIs
+                    ventasTotalesSpan.textContent = `$${(data.kpis.total_ingresos || 0).toFixed(2)}`;
+                    ticketPromedioSpan.textContent = `$${(data.kpis.ticket_promedio || 0).toFixed(2)}`;
+                    ventasAnuladasSpan.textContent = data.ventas_anuladas;
+
+                    // Renderizar gráficos
+                    renderVentasChart(data.ventas_agregadas, periodo);
+                    renderTopProductosChart(data.productos_vendidos);
+                    renderVentasMeseroChart(data.ventas_por_mesero);
+                    renderVentasCategoriaChart(data.ventas_por_categoria);
+                    renderVentasDiaSemanaChart(data.ventas_por_dia_semana);
+                    renderVentasHoraChart(data.ventas_por_hora);
+                    
+                } catch (error) {
+                    console.error('Error al cargar el dashboard:', error);
+                    alert('Hubo un error al cargar los datos. Verifique los filtros.');
+                }
+            }
+
+            // =========================================================================
+            // Funciones de renderizado de gráficos
+            // =========================================================================
+            function renderVentasChart(ventas, periodo) {
+                const labels = ventas.map(v => {
+                    if (periodo === 'dia') return v.fecha_dia.slice(5);
+                    if (periodo === 'mes') return v.fecha_dia.slice(0, 7);
+                    if (periodo === 'semana') {
+                        const date = new Date(v.fecha_dia);
+                        date.setDate(date.getDate() - date.getDay() + 1); // Lunes de la semana
+                        return `Semana de ${date.toISOString().slice(5, 10)}`;
+                    }
+                    return v.fecha_dia;
+                });
+                const data = ventas.map(v => parseFloat(v.total_ventas));
+                
+                if (ventasChart) ventasChart.destroy();
+                const ctx = document.getElementById('ventasChart').getContext('2d');
+                ventasChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Ventas Totales',
+                            data: data,
+                            borderColor: '#0d6efd',
+                            backgroundColor: 'rgba(13, 110, 253, 0.2)',
+                            fill: true, tension: 0.1
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                });
+            }
+
+            function renderTopProductosChart(productos) {
+                const labels = productos.map(p => p.producto_nombre);
+                const data = productos.map(p => parseInt(p.cantidad_vendida));
+                if (topProductosChart) topProductosChart.destroy();
+                const ctx = document.getElementById('topProductosChart').getContext('2d');
+                topProductosChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: { labels: labels, datasets: [{
+                        data: data,
+                        backgroundColor: ['#4CAF50', '#2196F3', '#FFC107', '#E91E63', '#9C27B0'],
+                        borderColor: '#fff'
+                    }] },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+            
+            function renderVentasMeseroChart(meseros) {
+                const labels = meseros.map(m => m.nombre_mesero);
+                const data = meseros.map(m => parseFloat(m.total_ventas));
+                if (ventasMeseroChart) ventasMeseroChart.destroy();
+                const ctx = document.getElementById('ventasMeseroChart').getContext('2d');
+                ventasMeseroChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: labels, datasets: [{
+                        label: 'Ventas por Mesero',
+                        data: data,
+                        backgroundColor: '#00bcd4',
+                        borderColor: '#0097a7',
+                        borderWidth: 1
+                    }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                });
+            }
+
+            function renderVentasCategoriaChart(categorias) {
+                const labels = categorias.map(c => c.categoria_nombre);
+                const data = categorias.map(c => parseFloat(c.total_vendido));
+                if (ventasCategoriaChart) ventasCategoriaChart.destroy();
+                const ctx = document.getElementById('ventasCategoriaChart').getContext('2d');
+                ventasCategoriaChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: { labels: labels, datasets: [{
+                        data: data,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+                        borderColor: '#fff'
+                    }] },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            function renderVentasDiaSemanaChart(dias) {
+                const diasLabels = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                const data = new Array(7).fill(0);
+                dias.forEach(d => {
+                    data[d.dia_semana_num] = parseFloat(d.total_ventas);
+                });
+                if (ventasDiaSemanaChart) ventasDiaSemanaChart.destroy();
+                const ctx = document.getElementById('ventasDiaSemanaChart').getContext('2d');
+                ventasDiaSemanaChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: diasLabels, datasets: [{
+                        label: 'Ventas',
+                        data: data,
+                        backgroundColor: '#6c757d',
+                        borderColor: '#5a6268',
+                        borderWidth: 1
+                    }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                });
+            }
+
+            function renderVentasHoraChart(horas) {
+                const labels = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+                const data = new Array(24).fill(0);
+                horas.forEach(h => {
+                    data[h.hora_dia] = parseFloat(h.total_ventas);
+                });
+                if (ventasHoraChart) ventasHoraChart.destroy();
+                const ctx = document.getElementById('ventasHoraChart').getContext('2d');
+                ventasHoraChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: labels, datasets: [{
+                        label: 'Ventas por Hora',
+                        data: data,
+                        backgroundColor: '#ffc107',
+                        borderColor: '#e0a800',
+                        borderWidth: 1
+                    }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                });
+            }
+
+            aplicarFiltrosBtn.addEventListener('click', cargarDashboard);
+            cargarMeseros();
+            cargarDashboard();
+        });
+    </script>
+</body>
+</html>
