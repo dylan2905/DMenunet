@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajustes del Local - DMENUNET</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">DMENUNET</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="mesas.html">Mesas</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="ajustes.html">
+                            <i class="bi bi-gear-fill"></i> Ajustes
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4 class="mb-0">Ajustes del Restaurante</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="form-ajustes">
+                            <div class="mb-3">
+                                <label for="nombre-negocio" class="form-label">Nombre del Restaurante</label>
+                                <input type="text" class="form-control" id="nombre-negocio" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="mesas-cantidad" class="form-label">Cantidad de Mesas</label>
+                                <input type="number" class="form-control" id="mesas-cantidad" min="1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="telefono-negocio" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="telefono-negocio">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-save-fill me-2"></i>Guardar Cambios</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="alert-container" class="mt-3 mx-4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const formAjustes = document.getElementById('form-ajustes');
+            const nombreInput = document.getElementById('nombre-negocio');
+            const mesasInput = document.getElementById('mesas-cantidad');
+            const telefonoInput = document.getElementById('telefono-negocio');
+            const alertContainer = document.getElementById('alert-container');
+
+            // Función para mostrar alertas
+            const showAlert = (message, type) => {
+                alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                                                ${message}
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                            </div>`;
+            };
+
+            // Paso 1: Cargar los datos actuales del restaurante
+            async function cargarDatos() {
+                try {
+                    const response = await fetch('./api/obtener_datos_local.php');
+                    if (!response.ok) {
+                        throw new Error('No se pudo obtener la configuración del restaurante.');
+                    }
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    // Rellenar el formulario con los datos actuales
+                    nombreInput.value = data.nombre || '';
+                    mesasInput.value = data.mesas || '';
+                    telefonoInput.value = data.telefono || '';
+                    
+                } catch (error) {
+                    showAlert(`Error al cargar los datos: ${error.message}`, 'danger');
+                    console.error('Error al cargar datos:', error);
+                }
+            }
+
+            // Paso 2: Manejar el envío del formulario para actualizar los datos
+            formAjustes.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const datosActualizados = {
+                    nombre: nombreInput.value,
+                    mesas: parseInt(mesasInput.value),
+                    telefono: telefonoInput.value,
+                    logo: '' // El logo se puede manejar por separado
+                };
+
+                try {
+                    const response = await fetch('./api/actualizar_informacion_local.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(datosActualizados)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Error al guardar los cambios.');
+                    }
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        showAlert('¡Ajustes guardados correctamente!', 'success');
+                    } else {
+                        throw new Error(result.message || 'Error desconocido.');
+                    }
+                } catch (error) {
+                    showAlert(`Hubo un problema al guardar: ${error.message}`, 'danger');
+                    console.error('Error al guardar:', error);
+                }
+            });
+
+            // Cargar los datos cuando la página se abra
+            cargarDatos();
+        });
+    </script>
+</body>
+</html>

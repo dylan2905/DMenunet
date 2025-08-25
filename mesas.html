@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesas - DMENUNET</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        .table-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .table-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">DMENUNET</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="mesas.html">Mesas</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="ajustes.html">
+                            <i class="bi bi-gear-fill"></i> Ajustes
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="mb-4 text-center">Gestión de Mesas</h1>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="mesas-grid">
+            </div>
+        <p id="loading-message" class="text-center mt-4">Cargando mesas...</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mesasGrid = document.getElementById('mesas-grid');
+            const loadingMessage = document.getElementById('loading-message');
+
+            async function obtenerMesasDelLocal() {
+                try {
+                    const response = await fetch('./api/obtener_datos_local.php');
+                    if (!response.ok) {
+                        throw new Error('Error al obtener los datos del local.');
+                    }
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    const numMesas = parseInt(data.mesas);
+                    if (isNaN(numMesas) || numMesas <= 0) {
+                        mesasGrid.innerHTML = `<div class="col-12 text-center">
+                            <p class="text-danger">No se ha especificado la cantidad de mesas en la configuración del restaurante.</p>
+                            <a href="ajustes.html" class="btn btn-primary">Ir a Ajustes</a>
+                        </div>`;
+                        return;
+                    }
+                    
+                    renderMesas(numMesas);
+
+                } catch (error) {
+                    mesasGrid.innerHTML = `<div class="col-12 text-center">
+                        <p class="text-danger">Hubo un problema al cargar la configuración del local: ${error.message}</p>
+                    </div>`;
+                    console.error('Error al obtener las mesas:', error);
+                } finally {
+                    loadingMessage.style.display = 'none';
+                }
+            }
+
+            function renderMesas(numMesas) {
+                mesasGrid.innerHTML = '';
+                for (let i = 1; i <= numMesas; i++) {
+                    const mesaCard = document.createElement('div');
+                    mesaCard.className = 'col';
+                    mesaCard.innerHTML = `
+                        <div class="card h-100 text-center table-card" data-mesa-id="${i}">
+                            <div class="card-body">
+                                <i class="bi bi-box-seam display-4 text-success"></i>
+                                <h5 class="card-title mt-2">Mesa ${i}</h5>
+                                <p class="card-text text-muted">Disponible</p>
+                            </div>
+                        </div>
+                    `;
+                    mesasGrid.appendChild(mesaCard);
+                }
+            }
+
+            mesasGrid.addEventListener('click', (e) => {
+                const card = e.target.closest('.table-card');
+                if (card) {
+                    const mesaId = card.dataset.mesaId;
+                    window.location.href = `pedidos.html?mesa=${encodeURIComponent(mesaId)}`;
+                }
+            });
+
+            obtenerMesasDelLocal();
+        });
+    </script>
+</body>
+</html>
