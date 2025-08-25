@@ -382,7 +382,19 @@ function registrarUsuario($usuario) {
  
 }
 
+function obtenerInsumosPorCategoria(int $categoriaId) {
+    global $con;
+    $sentencia = $con->prepare("SELECT id, nombre, descripcion, precio FROM insumos WHERE categoria_id = ?");
+    $sentencia->bind_param("i", $categoriaId);
+    $sentencia->execute();
+    $resultado = $sentencia->get_result();
 
+    $insumos = [];
+    while ($fila = $resultado->fetch_assoc()) {
+        $insumos[] = $fila;
+    }
+    return $insumos;
+}
 
 function obtenerInsumosPorNombre($insumo){
 	$bd = conectarBaseDatos();

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Inicial - DMENUNET</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light">
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4 class="mb-0">Configuración Inicial</h4>
+                    </div>
+                    <div class="card-body p-4">
+
+                        <div id="paso-empresa">
+                            <h5 class="card-title text-center mb-4">Paso 1: Datos del Restaurante</h5>
+                            <form id="form-empresa">
+                                <div class="mb-3">
+                                    <label for="nombre-negocio" class="form-label">Nombre del Restaurante</label>
+                                    <input type="text" class="form-control" id="nombre-negocio" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="mesas-cantidad" class="form-label">Cantidad de Mesas</label>
+                                    <input type="number" class="form-control" id="mesas-cantidad" min="1" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="telefono-negocio" class="form-label">Teléfono</label>
+                                    <input type="tel" class="form-control" id="telefono-negocio">
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">Siguiente</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div id="paso-usuario" class="d-none">
+                            <h5 class="card-title text-center mb-4">Paso 2: Registro del Administrador</h5>
+                            <form id="form-usuario">
+                                <div class="mb-3">
+                                    <label for="nombre-usuario" class="form-label">Nombre de Usuario</label>
+                                    <input type="text" class="form-control" id="nombre-usuario" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="correo-usuario" class="form-label">Correo Electrónico</label>
+                                    <input type="email" class="form-control" id="correo-usuario" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password-usuario" class="form-label">Contraseña</label>
+                                    <input type="password" class="form-control" id="password-usuario" required>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success">Finalizar Registro</button>
+                                    <button type="button" class="btn btn-secondary" id="btn-atras">Atrás</button>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const formEmpresa = document.getElementById('form-empresa');
+            const formUsuario = document.getElementById('form-usuario');
+            const pasoEmpresa = document.getElementById('paso-empresa');
+            const pasoUsuario = document.getElementById('paso-usuario');
+            const btnAtras = document.getElementById('btn-atras');
+
+            formEmpresa.addEventListener('submit', (e) => {
+                e.preventDefault();
+                pasoEmpresa.classList.add('d-none');
+                pasoUsuario.classList.remove('d-none');
+            });
+
+            btnAtras.addEventListener('click', () => {
+                pasoUsuario.classList.add('d-none');
+                pasoEmpresa.classList.remove('d-none');
+            });
+
+            formUsuario.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const nombreNegocio = document.getElementById('nombre-negocio').value;
+                const mesasCantidad = document.getElementById('mesas-cantidad').value;
+                const telefonoNegocio = document.getElementById('telefono-negocio').value;
+
+                const nombreUsuario = document.getElementById('nombre-usuario').value;
+                const correoUsuario = document.getElementById('correo-usuario').value;
+                const passwordUsuario = document.getElementById('password-usuario').value;
+
+                // Paso 1: Registrar el negocio
+                try {
+                    const responseNegocio = await fetch('./api/registrar_datos_local.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nombre: nombreNegocio,
+                            mesas: mesasCantidad,
+                            telefono: telefonoNegocio,
+                            logo: '' // Puedes dejar esto vacío por ahora
+                        })
+                    });
+
+                    if (!responseNegocio.ok) throw new Error('Error al registrar el restaurante.');
+                    const resultNegocio = await responseNegocio.json();
+                    if (resultNegocio.error) throw new Error(resultNegocio.error);
+                    
+                } catch (error) {
+                    alert(`Error en el registro del restaurante: ${error.message}`);
+                    return;
+                }
+
+                // Paso 2: Registrar el usuario administrador
+                try {
+                    const responseUsuario = await fetch('./api/registrar_usuario.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nombre: nombreUsuario,
+                            correo: correoUsuario,
+                            password: passwordUsuario,
+                            funcion: 'administrador',
+                            telefono: 'N/A' // O puedes pedirlo en el formulario
+                        })
+                    });
+
+                    if (!responseUsuario.ok) throw new Error('Error al registrar el usuario.');
+                    const resultUsuario = await responseUsuario.json();
+                    if (resultUsuario.error) throw new Error(resultUsuario.error);
+                    
+                    alert("Registro completado. ¡Bienvenido!");
+                    window.location.href = 'mesas.html'; // Redirigir a la página de mesas
+                } catch (error) {
+                    alert(`Error en el registro del usuario: ${error.message}`);
+                    return;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
