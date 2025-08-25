@@ -45,7 +45,7 @@
     <div class="container mt-5">
         <h1 class="mb-4 text-center">Gestión de Mesas</h1>
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="mesas-grid">
-            </div>
+        </div>
         <p id="loading-message" class="text-center mt-4">Cargando mesas...</p>
     </div>
 
@@ -77,6 +77,8 @@
                     }
                     
                     renderMesas(numMesas);
+                    // Llama a la nueva función para obtener el estado de las mesas
+                    actualizarEstadoMesas(); 
 
                 } catch (error) {
                     mesasGrid.innerHTML = `<div class="col-12 text-center">
@@ -85,6 +87,49 @@
                     console.error('Error al obtener las mesas:', error);
                 } finally {
                     loadingMessage.style.display = 'none';
+                }
+            }
+
+            // NUEVA FUNCIÓN: Obtiene el estado de las mesas y actualiza la UI
+            async function actualizarEstadoMesas() {
+                try {
+                    const response = await fetch('./api/obtener_estado_mesas.php');
+                    if (!response.ok) {
+                        throw new Error('Error al obtener el estado de las mesas.');
+                    }
+                    const mesasOcupadas = await response.json();
+                    
+                    // Recorre todas las tarjetas de mesa
+                    document.querySelectorAll('.table-card').forEach(card => {
+                        const mesaId = parseInt(card.dataset.mesaId);
+                        const icono = card.querySelector('i');
+                        const textoEstado = card.querySelector('.card-text');
+
+                        // Si el ID de la mesa está en la lista de mesas ocupadas
+                        if (mesasOcupadas.includes(mesaId)) {
+                            card.classList.remove('bg-light', 'text-dark');
+                            card.classList.add('bg-warning', 'text-white');
+                            icono.classList.remove('text-success');
+                            icono.classList.add('text-dark');
+                            icono.classList.replace('bi-box-seam', 'bi-cart-check-fill');
+                            textoEstado.textContent = 'Ocupada';
+                            textoEstado.classList.remove('text-muted');
+                            textoEstado.classList.add('fw-bold');
+                        } else {
+                            // En caso de que se haya liberado una mesa
+                            card.classList.remove('bg-warning', 'text-white');
+                            card.classList.add('bg-light', 'text-dark');
+                            icono.classList.remove('text-dark');
+                            icono.classList.add('text-success');
+                            icono.classList.replace('bi-cart-check-fill', 'bi-box-seam');
+                            textoEstado.textContent = 'Disponible';
+                            textoEstado.classList.remove('fw-bold');
+                            textoEstado.classList.add('text-muted');
+                        }
+                    });
+
+                } catch (error) {
+                    console.error('Error al actualizar el estado de las mesas:', error);
                 }
             }
 
