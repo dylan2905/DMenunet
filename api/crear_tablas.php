@@ -170,3 +170,13 @@ try {
 
 echo json_encode($resultados);
 ?>
+
+
+
+// ALTER TABLE insumos
+ADD COLUMN categoria VARCHAR(255) NULL,
+ADD COLUMN grupo VARCHAR(255) NULL,
+ADD COLUMN subgrupo VARCHAR(255) NULL,
+ADD COLUMN sub_subgrupo VARCHAR(255) NULL,
+ADD COLUMN codigo VARCHAR(50) NOT NULL UNIQUE,
+ADD COLUMN detalle TEXT NULL;
