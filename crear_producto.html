@@ -1,0 +1,255 @@
+<?php include_once "verificar_sesion.php"; ?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Producto - DMENUNET</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { border-radius: 1rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html"><i class="bi bi-house me-2"></i>Inicio</a>
+            <span class="navbar-text me-auto">Creación de Producto</span>
+            <a href="logout.php" class="btn btn-outline-light ms-auto">
+                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="mb-4 text-center">Registrar Nuevo Producto</h1>
+
+        <div class="card p-4 shadow-sm">
+            <form id="formCrearProducto">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre del Producto</label>
+                        <input type="text" class="form-control" id="nombre" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="precio" class="form-label">Precio ($)</label>
+                        <input type="number" step="0.01" class="form-control" id="precio" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="stock" class="form-label">Stock Inicial</label>
+                        <input type="number" class="form-control" id="stock" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="categoria" class="form-label">Categoría</label>
+                        <select class="form-select" id="categoria" required>
+                            <option value="">Cargando categorías...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="grupo" class="form-label">Grupo</label>
+                        <select class="form-select" id="grupo" disabled>
+                            <option value="">Seleccione un grupo (opcional)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="subgrupo" class="form-label">Subgrupo</label>
+                        <select class="form-select" id="subgrupo" disabled>
+                            <option value="">Seleccione un subgrupo (opcional)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="sub_subgrupo" class="form-label">Sub-Subgrupo</label>
+                        <select class="form-select" id="sub_subgrupo" disabled>
+                            <option value="">Seleccione un sub-subgrupo (opcional)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="codigoProducto" class="form-label">Código Automático</label>
+                        <input type="text" class="form-control" id="codigoProducto" readonly>
+                    </div>
+                    <div class="col-12">
+                        <label for="detalle" class="form-label">Detalles (opcional)</label>
+                        <input type="text" class="form-control" id="detalle">
+                    </div>
+                </div>
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-circle-fill me-2"></i>Crear Producto
+                    </button>
+                </div>
+            </form>
+            <div id="resultado-mensaje" class="mt-3 text-center"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const categoriaSelect = document.getElementById('categoria');
+        const grupoSelect = document.getElementById('grupo');
+        const subgrupoSelect = document.getElementById('subgrupo');
+        const sub_subgrupoSelect = document.getElementById('sub_subgrupo');
+        const codigoInput = document.getElementById('codigoProducto');
+        
+        // Función para cargar opciones en un select
+        function cargarOpciones(selectElement, data, placeholder) {
+            selectElement.innerHTML = `<option value="">${placeholder}</option>`;
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.nombre;
+                selectElement.appendChild(option);
+            });
+            selectElement.disabled = false;
+        }
+
+        // Función para generar un código único incremental
+        async function generarSiguienteCodigo(categoria, grupo, subgrupo, subSubgrupo) {
+            const response = await fetch(`./api/generar_codigo.php?categoria=${categoria}&grupo=${grupo}&subgrupo=${subgrupo}&sub_subgrupo=${subSubgrupo}`);
+            const data = await response.json();
+            return data.codigo;
+        }
+
+        // Cargar categorías al inicio
+        async function cargarCategorias() {
+            try {
+                const response = await fetch('./api/obtener_categorias.php');
+                const data = await response.json();
+                cargarOpciones(categoriaSelect, data, 'Seleccione una categoría');
+            } catch (error) {
+                console.error('Error al cargar categorías:', error);
+                categoriaSelect.innerHTML = '<option value="">Error al cargar</option>';
+            }
+        }
+        
+        // Manejar el cambio de categoría
+        categoriaSelect.addEventListener('change', async () => {
+            const categoriaId = categoriaSelect.value;
+            grupoSelect.disabled = true;
+            subgrupoSelect.disabled = true;
+            sub_subgrupoSelect.disabled = true;
+            codigoInput.value = '';
+
+            if (categoriaId) {
+                try {
+                    const response = await fetch(`./api/obtener_grupos.php?categoria=${encodeURIComponent(categoriaId)}`);
+                    const data = await response.json();
+                    cargarOpciones(grupoSelect, data, 'Seleccione un grupo (opcional)');
+                } catch (error) {
+                    console.error('Error al cargar grupos:', error);
+                    grupoSelect.innerHTML = '<option value="">Error al cargar</option>';
+                }
+            }
+        });
+
+        // Manejar el cambio de grupo
+        grupoSelect.addEventListener('change', async () => {
+            const categoriaId = categoriaSelect.value;
+            const grupoId = grupoSelect.value;
+            subgrupoSelect.disabled = true;
+            sub_subgrupoSelect.disabled = true;
+            codigoInput.value = '';
+
+            if (grupoId) {
+                try {
+                    const response = await fetch(`./api/obtener_subgrupos.php?categoria=${encodeURIComponent(categoriaId)}&grupo=${encodeURIComponent(grupoId)}`);
+                    const data = await response.json();
+                    cargarOpciones(subgrupoSelect, data, 'Seleccione un subgrupo (opcional)');
+                } catch (error) {
+                    console.error('Error al cargar subgrupos:', error);
+                    subgrupoSelect.innerHTML = '<option value="">Error al cargar</option>';
+                }
+            }
+        });
+
+        // Manejar el cambio de subgrupo
+        subgrupoSelect.addEventListener('change', async () => {
+            const categoriaId = categoriaSelect.value;
+            const grupoId = grupoSelect.value;
+            const subgrupoId = subgrupoSelect.value;
+            sub_subgrupoSelect.disabled = true;
+            codigoInput.value = '';
+
+            if (subgrupoId) {
+                try {
+                    const response = await fetch(`./api/obtener_subsubgrupos.php?categoria=${encodeURIComponent(categoriaId)}&grupo=${encodeURIComponent(grupoId)}&subgrupo=${encodeURIComponent(subgrupoId)}`);
+                    const data = await response.json();
+                    cargarOpciones(sub_subgrupoSelect, data, 'Seleccione un sub-subgrupo (opcional)');
+                } catch (error) {
+    console.error('Error al cargar sub-subgrupos:', error);
+                    sub_subgrupoSelect.innerHTML = '<option value="">Error al cargar</option>';
+                }
+            } else {
+                const categoria = categoriaSelect.options[categoriaSelect.selectedIndex].text;
+                const grupo = grupoSelect.options[grupoSelect.selectedIndex].text;
+                codigoInput.value = await generarSiguienteCodigo(categoria, grupo, '', '');
+            }
+        });
+
+        // Manejar el cambio de sub-subgrupo o la ausencia de uno
+        sub_subgrupoSelect.addEventListener('change', async () => {
+            const categoria = categoriaSelect.options[categoriaSelect.selectedIndex].text;
+            const grupo = grupoSelect.options[grupoSelect.selectedIndex].text;
+            const subgrupo = subgrupoSelect.options[subgrupoSelect.selectedIndex].text;
+            const subSubgrupo = sub_subgrupoSelect.options[sub_subgrupoSelect.selectedIndex].text;
+            codigoInput.value = await generarSiguienteCodigo(categoria, grupo, subgrupo, subSubgrupo);
+        });
+        
+        // Manejar el envío del formulario
+        document.getElementById('formCrearProducto').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value;
+            const precio = document.getElementById('precio').value;
+            const stock = document.getElementById('stock').value;
+            const categoria = categoriaSelect.value;
+            const grupo = grupoSelect.value;
+            const subgrupo = subgrupoSelect.value;
+            const sub_subgrupo = sub_subgrupoSelect.value;
+            const codigo = codigoInput.value;
+            const detalle = document.getElementById('detalle').value;
+            const mensajeDiv = document.getElementById('resultado-mensaje');
+            mensajeDiv.innerHTML = ''; 
+            
+            if (!codigo) {
+                mensajeDiv.innerHTML = '<div class="alert alert-warning">Por favor, complete todos los campos obligatorios para generar el código.</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch('./api/crear_producto.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        nombre, 
+                        precio, 
+                        stock, 
+                        categoria,
+                        grupo,
+                        subgrupo,
+                        sub_subgrupo,
+                        codigo,
+                        detalle
+                    })
+                });
+                const resultado = await response.json();
+                
+                if (resultado.success) {
+                    mensajeDiv.innerHTML = '<div class="alert alert-success">Producto creado correctamente.</div>';
+                    document.getElementById('formCrearProducto').reset(); 
+                    codigoInput.value = '';
+                } else {
+                    mensajeDiv.innerHTML = `<div class="alert alert-danger">${resultado.message}</div>`;
+                }
+            } catch (error) {
+                console.error('Error al crear el producto:', error);
+                mensajeDiv.innerHTML = '<div class="alert alert-danger">Hubo un error de conexión. Por favor, intente de nuevo.</div>';
+            }
+        });
+
+        // Cargar las categorías al cargar la página
+        cargarCategorias();
+    </script>
+</body>
+</html>
