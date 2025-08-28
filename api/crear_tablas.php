@@ -37,6 +37,7 @@ try {
          "sentencia" => 'CREATE TABLE IF NOT EXISTS informacion_negocio(
             nombre VARCHAR(100),
             telefono VARCHAR(15),
+            direccion VARCHAR(255),
             numeroMesas TINYINT,
             logo VARCHAR(255)
         );'],
@@ -45,6 +46,7 @@ try {
          "sentencia" => 'CREATE TABLE IF NOT EXISTS categorias(
             id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
             nombre VARCHAR(50) NOT NULL,
+            tipo VARCHAR(50) NOT NULL,
             descripcion VARCHAR(255)
         );'],
 

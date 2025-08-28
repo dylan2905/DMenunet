@@ -147,25 +147,6 @@
                 </ul>
             </div>
 
-            <!-- Configuración -->
-            <div class="module-card configuracion" onclick="openModal('configuracion')">
-                <div class="module-header">
-                    <div class="module-icon">
-                        <i class="fas fa-cog"></i>
-                    </div>
-                    <div class="module-title">Configuración</div>
-                </div>
-                <div class="module-description">
-                    Configuración del sistema y funciones
-                </div>
-                <ul class="module-functions">
-                    <li>Funciones del sistema</li>
-                    <li>Crear tablas</li>
-                    <li>Inicio de aplicación</li>
-                    <li>Configuración general</li>
-                </ul>
-            </div>
-
             <!-- Seguridad -->
             <div class="module-card seguridad" onclick="openModal('seguridad')">
                 <div class="module-header">
@@ -224,9 +205,10 @@
         title: 'Gestión de Restaurantes',
         icon: 'fas fa-users',
         functions: [
+            { file: 'crear_tablas.php', name: 'Crear DataBase', desc: 'Crear tablas del local' },
             { file: 'registrar_datos_local.php', name: 'Registrar datos', desc: 'Crear local en la base de datos' },
-            { file: 'obtener_datos_local.php', name: 'Obtener datos', desc: 'Obtener los datos del local' },
-            { file: 'crear_tablas.php', name: 'Crear Tablas', desc: 'Crear tablas del local' }
+            { file: 'actualizar_datos_local.php', name: 'Actualizar Datos', desc: 'Editar información del restaurante' }
+            
         ]
             },
             usuarios: {
@@ -246,7 +228,7 @@
                 icon: 'fas fa-tags',
                 functions: [
                     { file: 'registrar_categoria.php', name: 'Registrar Categoría', desc: 'Crear nuevas categorías de productos' },
-                    { file: 'editar_categoria.php', name: 'Editar Categoría', desc: 'Modificar categorías existentes' },
+                    { file: 'actualizar_categorias.php', name: 'Editar Categoría', desc: 'Modificar categorías existentes' },
                     { file: 'eliminar_categoria.php', name: 'Eliminar Categoría', desc: 'Eliminar categorías del sistema' },
                     { file: 'obtener_categorias.php', name: 'Listar Categorías', desc: 'Obtener todas las categorías' },
                     { file: 'obtener_categorias_tipo.php', name: 'Categorías por Tipo', desc: 'Filtrar categorías por tipo específico' }
@@ -289,15 +271,6 @@
                 functions: [
                     { file: 'obtener_datos_local.php', name: 'Datos del Local', desc: 'Información general del restaurante' },
                     { file: 'perfil.php', name: 'Perfiles', desc: 'Gestión de perfiles de usuario' }
-                ]
-            },
-            configuracion: {
-                title: 'Configuración del Sistema',
-                icon: 'fas fa-cog',
-                functions: [
-                    { file: 'funciones.php', name: 'Funciones del Sistema', desc: 'Funciones generales y utilidades' },
-                    { file: 'crear_tablas.php', name: 'Crear Tablas', desc: 'Inicializar estructura de base de datos' },
-                    { file: 'inicio.php', name: 'Página de Inicio', desc: 'Configuración de página principal' }
                 ]
             },
             seguridad: {
@@ -351,6 +324,12 @@
                 openForm('registrarInsumo');
             } else if (phpFile.includes('obtener_')) {
                 openDataView(phpFile);
+            } else if (phpFile.includes('registrar_datos_local')) {
+                openForm('registrarLocal');
+            } else if (phpFile.includes('actualizar_datos_local')) {
+                openForm('ActualizarDatosLocal');
+            } else if (phpFile.includes('actualizar_categorias')) {
+                openForm('ActualizarCategoria');
             } else {
                 // Para otras funciones, ejecutar directamente
                 executePhpFunction(phpFile);
@@ -395,44 +374,138 @@
                         </form>
                     `
                 },
+                registrarLocal:{
+                    title: '<i class="fas fa-user-plus"></i> Registrar Local',
+                    content: `
+                       <form id="registrarLocalForm" onsubmit="submitFormFile(event, 'registrar_datos_local.php')">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Nombre:</label>
+                                <input type="text" name="nombre" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Teléfono:</label>
+                                <input type="tel" name="telefono" " placeholder="Ej: 3001234567"
+                                    style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Número de Mesas:</label>
+                                <input type="number" name="numeroMesas" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
+                            </div>
+
+
+
+                            <div style="margin-bottom: 15px;">
+                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Dirección:</label>
+                                <input type="text" name="direccion" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Logo:</label>
+                                <input type="file" name="logo" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
+                            </div>
+
+                            <div style="display:flex;gap:10px;">
+                                <button type="submit" style="flex:1;padding:12px;background:#4CAF50;color:#fff;border:none;border-radius:5px;cursor:pointer;">
+                                <i class="fas fa-user-plus"></i> Registrar Restaurante
+                                </button>
+                                <button type="button" onclick="closeModal()" style="flex:1;padding:12px;background:#6c757d;color:#fff;border:none;border-radius:5px;cursor:pointer;">
+                                <i class="fas fa-times"></i> Cancelar
+                                </button>
+                            </div>
+                            </form>
+
+                    `
+                },
+
+                ActualizarDatosLocal: {
+                        title: '<i class="fas fa-edit"></i> Actualizar Local',
+                        content: `
+                        <form id="actualizarLocalForm" onsubmit="submitFormFile(event, 'actualizar_datos_local.php')">
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block;margin-bottom:5px;font-weight:bold;">Nombre:</label>
+                                    <input type="text" name="nombre" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block;margin-bottom:5px;font-weight:bold;">Teléfono:</label>
+                                    <input type="tel" name="telefono" placeholder="Ej: 3001234567"
+                                        style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block;margin-bottom:5px;font-weight:bold;">Número de Mesas:</label>
+                                    <input type="number" name="numeroMesas" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block;margin-bottom:5px;font-weight:bold;">Dirección:</label>
+                                    <input type="text" name="direccion" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block;margin-bottom:5px;font-weight:bold;">Logo (opcional):</label>
+                                    <input type="file" name="logo" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
+                                    <small style="color:#555;">Si no seleccionas un logo, se mantendrá el actual</small>
+                                </div>
+
+                                <div style="display:flex;gap:10px;">
+                                    <button type="submit" style="flex:1;padding:12px;background:#007BFF;color:#fff;border:none;border-radius:5px;cursor:pointer;">
+                                    <i class="fas fa-save"></i> Actualizar Restaurante
+                                    </button>
+                                    <button type="button" onclick="closeModal()" style="flex:1;padding:12px;background:#6c757d;color:#fff;border:none;border-radius:5px;cursor:pointer;">
+                                    <i class="fas fa-times"></i> Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        `
+
+                },
+
                 registrarUsuario: {
                     title: '<i class="fas fa-user-plus"></i> Registrar Usuario',
                     content: `
-                        <form id="registrarUsuarioForm" onsubmit="submitForm(event, 'registrar_usuario.php')">
+                       <form id="registrarUsuarioForm" onsubmit="submitForm(event, 'registrar_usuario.php')">
                             <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Nombre:</label>
-                                <input type="text" name="nombre" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Nombre:</label>
+                                <input type="text" name="nombre" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
                             </div>
+
                             <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Email:</label>
-                                <input type="email" name="email" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Correo:</label>
+                                <input type="email" name="correo" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
                             </div>
+
                             <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Usuario:</label>
-                                <input type="text" name="usuario" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Teléfono:</label>
+                                <input type="tel" name="telefono" " placeholder="Ej: 3001234567"
+                                    style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
                             </div>
+
                             <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Contraseña:</label>
-                                <input type="password" name="password" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Contraseña:</label>
+                                <input type="password" name="password" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
                             </div>
+
                             <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Rol:</label>
-                                <select name="rol" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                                    <option value="mesero">Mesero</option>
-                                    <option value="cocinero">Cocinero</option>
-                                    <option value="administrador">Administrador</option>
-                                    <option value="cajero">Cajero</option>
+                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Rol:</label>
+                                <select name="rol" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
+                                <option value="mesero">Mesero</option>
+                                <option value="administrador">Administrador</option>
                                 </select>
                             </div>
-                            <div style="display: flex; gap: 10px;">
-                                <button type="submit" style="flex: 1; padding: 12px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                    <i class="fas fa-user-plus"></i> Registrar Usuario
+
+                            <div style="display:flex;gap:10px;">
+                                <button type="submit" style="flex:1;padding:12px;background:#4CAF50;color:#fff;border:none;border-radius:5px;cursor:pointer;">
+                                <i class="fas fa-user-plus"></i> Registrar Usuario
                                 </button>
-                                <button type="button" onclick="closeModal()" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                    <i class="fas fa-times"></i> Cancelar
+                                <button type="button" onclick="closeModal()" style="flex:1;padding:12px;background:#6c757d;color:#fff;border:none;border-radius:5px;cursor:pointer;">
+                                <i class="fas fa-times"></i> Cancelar
                                 </button>
                             </div>
-                        </form>
+                            </form>
+
                     `
                 },
                 registrarCategoria: {
@@ -441,7 +514,7 @@
                         <form id="registrarCategoriaForm" onsubmit="submitForm(event, 'registrar_categoria.php')">
                             <div style="margin-bottom: 15px;">
                                 <label style="display: block; margin-bottom: 5px; font-weight: bold;">Nombre de Categoría:</label>
-                                <input type="text" name="nombre_categoria" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                                <input type="text" name="nombre" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
                             </div>
                             <div style="margin-bottom: 15px;">
                                 <label style="display: block; margin-bottom: 5px; font-weight: bold;">Descripción:</label>
@@ -468,6 +541,19 @@
                         </form>
                     `
                 },
+               ActualizarCategoria: {
+                        title: '<i class="fas fa-tags"></i> Actualizar Categoría',
+                        content: `
+                            <div style="text-align: center; padding: 20px;">
+                                <p>Para editar una categoría, haz clic en el botón de abajo:</p>
+                                <a href="pages/editar_categorias.html" style="display: inline-block; padding: 12px 20px; background: #2196F3; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                                    <i class="fas fa-edit"></i> Ir a Editar Categorías
+                                </a>
+                            </div>
+                        `
+                    },
+
+
                 registrarInsumo: {
                     title: '<i class="fas fa-box"></i> Registrar Insumo',
                     content: `
@@ -540,40 +626,77 @@
         }
 
         function submitForm(event, phpFile) {
+                    event.preventDefault();
+                    
+                    const formData = new FormData(event.target);
+                    const data = Object.fromEntries(formData.entries());
+                    
+                    // Mostrar en consola lo que se enviará
+                    console.log('Datos a enviar:', data);
+
+                    fetch(`api/${phpFile}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Error en la respuesta del servidor");
+                        }
+                        return response.text(); // no esperamos JSON
+                    })
+                    .then(() => {
+                        showSuccess('Hecho ✅'); // Solo con que llegue bien
+                        closeModal();
+                    })
+                    .catch(error => {
+                        console.error("Error en submitForm:", error);
+                        showError('Error de conexión: ' + error.message);
+                    });
+                }
+
+        function submitFormFile(event, phpFile) {
             event.preventDefault();
             
-            const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData.entries());
+            const formData = new FormData(event.target); // aquí sí va el archivo logo
             
-            // Mostrar los datos que se enviarían
-            console.log('Datos a enviar:', data);
-            
-            // Simular envío exitoso
-            showSuccess(`Datos enviados correctamente a ${phpFile}`);
-            
-            // Aquí harías la llamada real a PHP:
-            
+            // Mostrar en consola lo que se enviará (sin mostrar archivo completo)
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+
             fetch(`api/${phpFile}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
+                body: formData
             })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    showSuccess('Operación completada exitosamente');
-                    closeModal();
-                } else {
-                    showError(result.message || 'Error en la operación');
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Error en la respuesta del servidor");
                 }
+                return response.text(); // ya no esperamos JSON
+            })
+            .then(() => {
+                showSuccess('Hecho ✅');
+                closeModal();
             })
             .catch(error => {
+                console.error("Error en submitForm:", error);
                 showError('Error de conexión: ' + error.message);
             });
-            
         }
+        
+        function cargarCategoriaParaEditar(categoria) {
+            document.getElementById("categoriaId").value = categoria.id;
+            document.getElementById("categoriaNombre").value = categoria.nombre;
+            document.getElementById("categoriaDescripcion").value = categoria.descripcion;
+            document.getElementById("categoriaTipo").value = categoria.tipo;
+
+            // Abrir el modal de actualización
+            openModal('ActualizarCategoria');
+        }
+
 
         function executePhpFunction(phpFile) {
             showInfo(`Ejecutando: ${phpFile}\n\nRuta completa: api/${phpFile}\n\nEn producción, esto se conectaría directamente con tu archivo PHP.`);
