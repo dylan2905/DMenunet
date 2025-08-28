@@ -1,0 +1,86 @@
+/* Fondo de la página */
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: Arial, sans-serif;
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    color: #333;
+}
+
+/* Contenedor del formulario */
+.container {
+    background-color: rgba(70, 87, 73, 0.448);
+    padding: 40px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px; /* Limita el ancho máximo */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Títulos */
+h1 {
+    color: #fff;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Etiquetas */
+label {
+    color: #fff;
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+/* Inputs y select */
+input[type="text"],
+select {
+    width: 100%;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+/* Botón */
+button {
+    background-color: #3772ff;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.5s;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+mensaje {
+    color: #fff;
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Mensaje de éxito */
+#mensaje {
+    color: #ffffff;
+    text-align: center;
+    margin-top: 20px;
+    border-color: #333;
+    background-origin: padding-box;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: #333;
+    border: 1px solid #fff;
+    font-size: 20px;
+    color: #fff;
+}
+

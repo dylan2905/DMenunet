@@ -7,8 +7,7 @@ if (!$usuario) {
 }
 
 include_once "funciones.php";
-$defecto = "Lotso12";
-$usuario->password = password_hash($defecto, PASSWORD_DEFAULT);
+$usuario->password = password_hash($usuario->password, PASSWORD_DEFAULT);
 
 $resultado = registrarUsuario($usuario);
 echo json_encode($resultado);

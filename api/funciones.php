@@ -4,7 +4,7 @@ define('DIRECTORIO', './fotos/');
 
 function verificarTablas() {
     $bd = conectarBaseDatos();
-    $sentencia  = $bd->query("SELECT COUNT(*) AS resultado FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'Menunet'");
+    $sentencia  = $bd->query("SELECT COUNT(*) AS resultado FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'Dmenunet'");
     return $sentencia->fetchAll();
 }
 
@@ -513,14 +513,14 @@ function obtenerInsumosPorNombre($insumo){
 
 function actualizarInformacionLocal($datos){
 	$bd = conectarBaseDatos();
-	$sentencia = $bd->prepare("UPDATE informacion_negocio SET nombre = ?, telefono = ?, numeroMesas = ?, logo = ?");
-	return $sentencia->execute([$datos->nombre, $datos->telefono, $datos->numeroMesas, $datos->logo]);
+	$sentencia = $bd->prepare("UPDATE informacion_negocio SET nombre = ?, telefono = ?, direccion = ?, numeroMesas = ?, logo = ?");
+	return $sentencia->execute([$datos->nombre, $datos->telefono, $datos->direccion, $datos->numeroMesas, $datos->logo]);
 }
 
 function registrarInformacionLocal($datos){
 	$bd = conectarBaseDatos();
-	$sentencia = $bd->prepare("INSERT INTO informacion_negocio (nombre, telefono, numeroMesas, logo) vALUES (?,?,?,?)");
-	return $sentencia->execute([$datos->nombre, $datos->telefono, $datos->numeroMesas, $datos->logo]);
+	$sentencia = $bd->prepare("INSERT INTO informacion_negocio (nombre, telefono, direccion, numeroMesas, logo) vALUES (?,?,?,?,?)");
+	return $sentencia->execute([$datos->nombre, $datos->telefono, $datos->direccion, $datos->numeroMesas, $datos->logo]);
 }
 
 function obtenerInformacionLocal(){
@@ -626,6 +626,8 @@ function obtenerCategorias(){
 	return $sentencia->fetchAll();
 }
 
+
+
 /**
  * Registra una nueva venta en la tabla 'ventas'.
  *
@@ -700,7 +702,7 @@ function descontarInventario($insumoId, $cantidad) {
 
 function conectarBaseDatos() {
 	$host = "localhost";
-	$db   = "menunet";
+	$db   = "Dmenunet";
 	$user = "root";
 	$pass = "";
 	$charset = 'utf8mb4';
