@@ -8,7 +8,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 $servername = "localhost";
 $username = "root";  // Cambia por tus credenciales
 $password = ""; // Cambia por tus credenciales
-$dbname = "menunet"; // Cambia por tu base de datos
+$dbname = "dmenunet"; // Cambia por tu base de datos
 
 try {
     $pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8", $username, $password);
@@ -58,16 +58,16 @@ function crearPlato($pdo) {
         }
         
         // Verificar subcategoría si se proporciona
-        if (!empty($datos['subcategoria_id'])) {
-            $stmt = $pdo->prepare("SELECT id FROM subcategorias WHERE id = ? AND categoria_id = ?");
-            $stmt->execute([$datos['subcategoria_id'], $datos['categoria_id']]);
+        if (!empty($datos['grupo_id'])) {
+            $stmt = $pdo->prepare("SELECT id FROM grupos WHERE id = ? AND categoria_id = ?");
+            $stmt->execute([$datos['grupo_id'], $datos['categoria_id']]);
             if (!$stmt->fetch()) {
-                enviarRespuesta(['error' => 'La subcategoría especificada no existe o no pertenece a esta categoría'], 400);
+                enviarRespuesta(['error' => 'El grupo especificado no existe o no pertenece a esta categoría'], 400);
             }
         }
         
         // Crear plato
-        $sql = "INSERT INTO platos (nombre, descripcion, precio, categoria_id, subcategoria_id, estado, creado_en) 
+        $sql = "INSERT INTO platos (nombre, descripcion, precio, categoria_id, grupo_id, estado, creado_en) 
                 VALUES (?, ?, ?, ?, ?, ?, NOW())";
         
         $stmt = $pdo->prepare($sql);
@@ -76,7 +76,7 @@ function crearPlato($pdo) {
             isset($datos['descripcion']) ? trim($datos['descripcion']) : null,
             $datos['precio'],
             $datos['categoria_id'],
-            !empty($datos['subcategoria_id']) ? $datos['subcategoria_id'] : null,
+            !empty($datos['grupo_id']) ? $datos['grupo_id'] : null,
             isset($datos['estado']) ? $datos['estado'] : 'activo'
         ]);
         
@@ -87,7 +87,7 @@ function crearPlato($pdo) {
             SELECT p.*, c.nombre as categoria_nombre, s.nombre as subcategoria_nombre
             FROM platos p
             LEFT JOIN categorias c ON p.categoria_id = c.id
-            LEFT JOIN subcategorias s ON p.subcategoria_id = s.id
+            LEFT JOIN grupos s ON p.grupo_id = s.id
             WHERE p.id = ?
         ");
         $stmt->execute([$id]);
@@ -133,16 +133,16 @@ function actualizarPlato($pdo) {
         }
         
         // Verificar subcategoría si se proporciona
-        if (!empty($datos['subcategoria_id'])) {
-            $stmt = $pdo->prepare("SELECT id FROM subcategorias WHERE id = ? AND categoria_id = ?");
-            $stmt->execute([$datos['subcategoria_id'], $datos['categoria_id']]);
+        if (!empty($datos['grupo_id'])) {
+            $stmt = $pdo->prepare("SELECT id FROM grupos WHERE id = ? AND categoria_id = ?");
+            $stmt->execute([$datos['grupo_id'], $datos['categoria_id']]);
             if (!$stmt->fetch()) {
-                enviarRespuesta(['error' => 'La subcategoría especificada no existe o no pertenece a esta categoría'], 400);
+                enviarRespuesta(['error' => 'El grupo especificado no existe o no pertenece a esta categoría'], 400);
             }
         }
         
         // Actualizar plato
-        $sql = "UPDATE platos SET nombre = ?, descripcion = ?, precio = ?, categoria_id = ?, subcategoria_id = ?, estado = ? WHERE id = ?";
+        $sql = "UPDATE platos SET nombre = ?, descripcion = ?, precio = ?, categoria_id = ?, grupo_id = ?, estado = ? WHERE id = ?";
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
@@ -150,17 +150,17 @@ function actualizarPlato($pdo) {
             isset($datos['descripcion']) ? trim($datos['descripcion']) : null,
             $datos['precio'],
             $datos['categoria_id'],
-            !empty($datos['subcategoria_id']) ? $datos['subcategoria_id'] : null,
+            !empty($datos['grupo_id']) ? $datos['grupo_id'] : null,
             isset($datos['estado']) ? $datos['estado'] : 'activo',
             $datos['id']
         ]);
         
         // Obtener el plato actualizado con información completa
         $stmt = $pdo->prepare("
-            SELECT p.*, c.nombre as categoria_nombre, s.nombre as subcategoria_nombre
+            SELECT p.*, c.nombre as categoria_nombre, g.nombre as grupo_nombre
             FROM platos p
             LEFT JOIN categorias c ON p.categoria_id = c.id
-            LEFT JOIN subcategorias s ON p.subcategoria_id = s.id
+            LEFT JOIN grupos g ON p.grupo_id = g.id
             WHERE p.id = ?
         ");
         $stmt->execute([$datos['id']]);
