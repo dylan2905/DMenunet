@@ -603,7 +603,7 @@
         e.preventDefault();
 
         const nombre = document.getElementById('subcategoryName').value;
-        const categoriaId = document.getElementById('subcategoryCategory').value;
+        const id_categoria = document.getElementById('subcategoryCategory').value;
 
         fetch('subcategorias.php', {
             method: 'POST',
@@ -612,17 +612,17 @@
             },
             body: JSON.stringify({
                 nombre: nombre,
-                categorias_id: categoriaId   // 👈 debe coincidir con el PHP
+                id_categoria: id_categoria   // 👈 coincide con la BD y PHP
             })
         })
         .then(res => res.json())
         .then(data => {
             if (data.id) {
-                // Si la API devuelve la nueva subcategoría, la agregamos también a la UI
+                // Agregamos la nueva subcategoría en memoria/localStorage
                 subcategories.push({
                     id: data.id,
                     name: data.nombre,
-                    categoryId: data.categorias_id
+                    categoryId: data.id_categoria   // 👈 aquí va id_categoria, no categorias_id
                 });
                 localStorage.setItem('subcategories', JSON.stringify(subcategories));
 
@@ -635,6 +635,7 @@
         })
         .catch(err => console.error("Error en la petición:", err));
     });
+
 
 
         document.getElementById('dishCategory').addEventListener('change', updateSubcategorySelect);
