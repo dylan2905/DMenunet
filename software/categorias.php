@@ -8,7 +8,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "menunet";
+$dbname = "dmenunet";
 
 try {
     $pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8", $username, $password);
@@ -74,7 +74,7 @@ switch ($method) {
             $pdo->beginTransaction();
 
             // Eliminar subcategorías
-            $stmt = $pdo->prepare("DELETE FROM subcategorias WHERE categoria_id = ?");
+            $stmt = $pdo->prepare("DELETE FROM grupos WHERE categoria_id = ?");
             $stmt->execute([$_GET['id']]);
 
             // Eliminar platos
