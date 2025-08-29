@@ -598,13 +598,14 @@
         .catch(err => console.error("Error en la petición:", err));
     });
 
+        
 
         document.getElementById('subcategoryForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
         const nombre = document.getElementById('subcategoryName').value;
         const id_categoria = document.getElementById('subcategoryCategory').value;
-
+        console.log("Nombre:", nombre, "ID categoría:", id_categoria);
         fetch('subcategorias.php', {
             method: 'POST',
             headers: {
@@ -621,8 +622,8 @@
                 // Agregamos la nueva subcategoría en memoria/localStorage
                 subcategories.push({
                     id: data.id,
-                    name: data.nombre,
-                    categoryId: data.id_categoria   // 👈 aquí va id_categoria, no categorias_id
+                    id_categoria: data.id_categoria,  // 👈 aquí va id_categoria, no categorias_id
+                    name: data.nombre
                 });
                 localStorage.setItem('subcategories', JSON.stringify(subcategories));
 

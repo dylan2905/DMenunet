@@ -44,8 +44,8 @@ function obtenerSubcategorias($pdo) {
 function crearSubcategoria($pdo) {
     $datos = json_decode(file_get_contents('php://input'), true);
     
-    if (!isset($datos['nombre']) || !isset($datos['categoria_id']) || 
-        empty(trim($datos['nombre'])) || empty($datos['categoria_id'])) {
+    if (!isset($datos['nombre']) || !isset($datos['id_categoria']) || 
+        empty(trim($datos['nombre'])) || empty($datos['id_categoria'])) {
         enviarRespuesta(['error' => 'Nombre y id_categoria son requeridos'], 400);
     }
     
@@ -58,8 +58,13 @@ function crearSubcategoria($pdo) {
         }
         
         // Crear subcategoría
-        $stmt = $pdo->prepare("INSERT INTO grupos (nombre, id_categoria) VALUES (?, ?)");
-        $stmt->execute([trim($datos['nombre']), $datos['id_categoria']]);
+        $stmt = $pdo->prepare("INSERT INTO grupos (id_categoria, nombre, descripcion) VALUES (?, ?, ?)");
+        $stmt->execute([
+            $datos['id_categoria'],
+            trim($datos['nombre']),
+            null   // dejamos descripcion en NULL ya que no la usas
+        ]);
+
         
         $id = $pdo->lastInsertId();
         $grupo = [
@@ -80,6 +85,12 @@ function crearSubcategoria($pdo) {
 
 function actualizarSubcategoria($pdo) {
     $datos = json_decode(file_get_contents('php://input'), true);
+        if ($datos === null) {
+    enviarRespuesta(['error' => 'No se recibió JSON válido', 'raw' => file_get_contents('php://input')], 400);
+}
+
+// Depuración
+enviarRespuesta(['debug' => $datos], 200);
     
     if (!isset($datos['id']) || !isset($datos['nombre']) || !isset($datos['id_categoria']) ||
         empty(trim($datos['nombre'])) || empty($datos['id_categoria'])) {
