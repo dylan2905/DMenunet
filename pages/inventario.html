@@ -55,175 +55,228 @@
     </div>
 </nav>
 
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Gestión de Inventario de Insumos</h1>
 
-    <div class="container mt-5">
-        <h1 class="mb-4 text-center">Gestión de Inventario de Insumos</h1>
-
-        <!-- Alertas de bajo stock -->
-        <div id="alertas-stock" class="alert alert-warning d-none" role="alert">
-            <h4 class="alert-heading">¡Advertencia de Bajo Stock!</h4>
-            <p>Los siguientes productos tienen un stock bajo. Por favor, reabastece pronto.</p>
-            <ul id="lista-alertas-stock" class="mb-0"></ul>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <input type="text" class="form-control" id="searchInput" placeholder="Buscar por nombre, código...">
+                <button class="btn btn-outline-secondary" type="button" id="searchButton"><i class="bi bi-search"></i></button>
+            </div>
         </div>
+        <div class="col-md-6 text-md-end">
+            <a href="crear_insumo.html" class="btn btn-success">
+                <i class="bi bi-plus-circle me-1"></i> Agregar Insumo
+            </a>
+        </div>
+    </div>
 
-        <div class="card p-4 shadow-sm">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <thead class="bg-primary text-white">
-                        <tr>
-                            <th>Código</th>
-                            <th>Nombre</th>
-                            <th>Precio</th>
-                            <th>Stock</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="insumos-tabla">
-                        <!-- Filas de insumos se cargarán aquí por JS -->
+    <div id="alertas-stock" class="alert alert-warning d-none" role="alert">
+        <h4 class="alert-heading">¡Advertencia de Bajo Stock!</h4>
+        <p>Los siguientes productos tienen un stock bajo. Por favor, reabastece pronto.</p>
+        <ul id="lista-alertas-stock" class="mb-0"></ul>
+    </div>
+
+    <div class="card p-4 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="insumos-tabla">
                     </tbody>
-                </table>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditarInsumo" tabindex="-1" aria-labelledby="modalEditarInsumoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarInsumoLabel">Editar Insumo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarInsumo">
+                    <input type="hidden" id="insumo-id">
+                    <div class="mb-3">
+                        <label for="insumo-nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="insumo-nombre" required readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="insumo-stock" class="form-label">Stock Actual</label>
+                        <input type="number" class="form-control" id="insumo-stock" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="insumo-precio" class="form-label">Precio</label>
+                        <input type="number" step="0.01" class="form-control" id="insumo-precio" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal para editar insumo -->
-    <div class="modal fade" id="modalEditarInsumo" tabindex="-1" aria-labelledby="modalEditarInsumoLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalEditarInsumoLabel">Editar Insumo</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="formEditarInsumo">
-                        <input type="hidden" id="insumo-id">
-                        <div class="mb-3">
-                            <label for="insumo-nombre" class="form-label">Nombre</label>
-                            <input type="text" class="form-control" id="insumo-nombre" required readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="insumo-stock" class="form-label">Stock Actual</label>
-                            <input type="number" class="form-control" id="insumo-stock" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="insumo-precio" class="form-label">Precio</label>
-                            <input type="number" step="0.01" class="form-control" id="insumo-precio" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const API_URL = './api/insumos.php';
+    const modalEditarInsumo = new bootstrap.Modal(document.getElementById('modalEditarInsumo'));
+    const formEditarInsumo = document.getElementById('formEditarInsumo');
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const API_URL = './api/insumos.php';
-        const modalEditarInsumo = new bootstrap.Modal(document.getElementById('modalEditarInsumo'));
-        const formEditarInsumo = document.getElementById('formEditarInsumo');
+    // Cargar insumos
+    async function cargarInsumos(query = '') {
+        try {
+            const response = await fetch(`${API_URL}?q=${encodeURIComponent(query)}`);
+            const insumos = await response.json();
+            
+            const tablaBody = document.getElementById('insumos-tabla');
+            tablaBody.innerHTML = '';
+            const listaAlertas = document.getElementById('lista-alertas-stock');
+            listaAlertas.innerHTML = '';
+            let hayAlertas = false;
 
-        // Cargar insumos
-        async function cargarInsumos() {
-            try {
-                const response = await fetch(API_URL);
-                const insumos = await response.json();
-                
-                const tablaBody = document.getElementById('insumos-tabla');
-                tablaBody.innerHTML = '';
-                const listaAlertas = document.getElementById('lista-alertas-stock');
-                listaAlertas.innerHTML = '';
-                let hayAlertas = false;
+            insumos.forEach(insumo => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${insumo.codigo}</td>
+                    <td>${insumo.nombre}</td>
+                    <td>$${parseFloat(insumo.precio).toFixed(2)}</td>
+                    <td>${insumo.stock}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm btn-action editar-btn" data-id="${insumo.id}" data-bs-toggle="modal" data-bs-target="#modalEditarInsumo">
+                            <i class="bi bi-pencil-square"></i> Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm btn-action eliminar-btn" data-id="${insumo.id}">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </button>
+                    </td>
+                `;
+                tablaBody.appendChild(row);
 
-                insumos.forEach(insumo => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${insumo.codigo}</td>
-                        <td>${insumo.nombre}</td>
-                        <td>$${parseFloat(insumo.precio).toFixed(2)}</td>
-                        <td>${insumo.stock}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm btn-action editar-btn" data-id="${insumo.id}">
-                                <i class="bi bi-pencil-square"></i> Editar
-                            </button>
-                        </td>
-                    `;
-                    tablaBody.appendChild(row);
-
-                    // Alerta de bajo stock (ejemplo: stock < 10)
-                    if (insumo.stock < 10) {
-                        const alertaItem = document.createElement('li');
-                        alertaItem.textContent = `${insumo.nombre} (Stock: ${insumo.stock})`;
-                        listaAlertas.appendChild(alertaItem);
-                        hayAlertas = true;
-                    }
-                });
-
-                const alertaDiv = document.getElementById('alertas-stock');
-                if (hayAlertas) {
-                    alertaDiv.classList.remove('d-none');
-                } else {
-                    alertaDiv.classList.add('d-none');
+                // Alerta de bajo stock (ejemplo: stock < 10)
+                if (insumo.stock < 10) {
+                    const alertaItem = document.createElement('li');
+                    alertaItem.textContent = `${insumo.nombre} (Stock: ${insumo.stock})`;
+                    listaAlertas.appendChild(alertaItem);
+                    hayAlertas = true;
                 }
+            });
+
+            const alertaDiv = document.getElementById('alertas-stock');
+            if (hayAlertas) {
+                alertaDiv.classList.remove('d-none');
+            } else {
+                alertaDiv.classList.add('d-none');
+            }
+        } catch (error) {
+            console.error('Error al cargar insumos:', error);
+            alert('Hubo un error al cargar los insumos.');
+        }
+    }
+
+    // Manejar la búsqueda
+    document.getElementById('searchButton').addEventListener('click', () => {
+        const query = document.getElementById('searchInput').value;
+        cargarInsumos(query);
+    });
+
+    document.getElementById('searchInput').addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            const query = e.target.value;
+            cargarInsumos(query);
+        }
+    });
+
+    // Abrir modal de edición
+    document.getElementById('insumos-tabla').addEventListener('click', async (e) => {
+        if (e.target.classList.contains('editar-btn')) {
+            const insumoId = e.target.getAttribute('data-id');
+            try {
+                const response = await fetch(`${API_URL}?id=${insumoId}`);
+                const insumo = await response.json();
+                
+                document.getElementById('insumo-id').value = insumo.id;
+                document.getElementById('insumo-nombre').value = insumo.nombre;
+                document.getElementById('insumo-stock').value = insumo.stock;
+                document.getElementById('insumo-precio').value = insumo.precio;
+                
+                modalEditarInsumo.show();
             } catch (error) {
-                console.error('Error al cargar insumos:', error);
-                alert('Hubo un error al cargar los insumos.');
+                console.error('Error al obtener insumo:', error);
+                alert('No se pudo cargar la información del insumo.');
             }
         }
+    });
 
-        // Abrir modal de edición
-        document.getElementById('insumos-tabla').addEventListener('click', async (e) => {
-            if (e.target.classList.contains('editar-btn')) {
-                const insumoId = e.target.getAttribute('data-id');
-                try {
-                    const response = await fetch(`${API_URL}?id=${insumoId}`);
-                    const insumo = await response.json();
-                    
-                    document.getElementById('insumo-id').value = insumo.id;
-                    document.getElementById('insumo-nombre').value = insumo.nombre;
-                    document.getElementById('insumo-stock').value = insumo.stock;
-                    document.getElementById('insumo-precio').value = insumo.precio;
-                    
-                    modalEditarInsumo.show();
-                } catch (error) {
-                    console.error('Error al obtener insumo:', error);
-                    alert('No se pudo cargar la información del insumo.');
-                }
-            }
-        });
+    // Manejar el envío del formulario de edición
+    formEditarInsumo.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const insumoId = document.getElementById('insumo-id').value;
+        const nuevoStock = document.getElementById('insumo-stock').value;
+        const nuevoPrecio = document.getElementById('insumo-precio').value;
 
-        // Manejar el envío del formulario de edición
-        formEditarInsumo.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        try {
+            const response = await fetch(API_URL, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    id: insumoId, 
+                    stock: nuevoStock,
+                    precio: nuevoPrecio
+                })
+            });
+            const resultado = await response.json();
             
-            const insumoId = document.getElementById('insumo-id').value;
-            const nuevoStock = document.getElementById('insumo-stock').value;
-            const nuevoPrecio = document.getElementById('insumo-precio').value;
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        id: insumoId, 
-                        stock: nuevoStock,
-                        precio: nuevoPrecio
-                    })
-                });
-                const resultado = await response.json();
-                
-                if (resultado.success) {
-                    modalEditarInsumo.hide();
-                    cargarInsumos(); // Recargar la tabla
-                } else {
-                    alert(resultado.message);
-                }
-            } catch (error) {
-                console.error('Error al actualizar insumo:', error);
-                alert('Hubo un error al guardar los cambios.');
+            if (resultado.success) {
+                modalEditarInsumo.hide();
+                cargarInsumos(); // Recargar la tabla
+            } else {
+                alert(resultado.message);
             }
-        });
+        } catch (error) {
+            console.error('Error al actualizar insumo:', error);
+            alert('Hubo un error al guardar los cambios.');
+        }
+    });
 
-        cargarInsumos();
-    </script>
+    // Manejar la eliminación de insumo
+    document.getElementById('insumos-tabla').addEventListener('click', async (e) => {
+        if (e.target.classList.contains('eliminar-btn')) {
+            const insumoId = e.target.getAttribute('data-id');
+            if (confirm('¿Estás seguro de que quieres eliminar este insumo?')) {
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: insumoId })
+                    });
+                    const resultado = await response.json();
+                    
+                    if (resultado.success) {
+                        cargarInsumos(); // Recargar la tabla
+                    } else {
+                        alert(resultado.message);
+                    }
+                } catch (error) {
+                    console.error('Error al eliminar insumo:', error);
+                    alert('Hubo un error al eliminar el insumo.');
+                }
+            }
+        }
+    });
+
+    // Llamada inicial para cargar los insumos
+    cargarInsumos();
+</script>
 </body>
 </html>
