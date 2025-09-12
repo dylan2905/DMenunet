@@ -68,84 +68,87 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const formEmpresa = document.getElementById('form-empresa');
-            const formUsuario = document.getElementById('form-usuario');
-            const pasoEmpresa = document.getElementById('paso-empresa');
-            const pasoUsuario = document.getElementById('paso-usuario');
-            const btnAtras = document.getElementById('btn-atras');
+   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const formEmpresa = document.getElementById('form-empresa');
+        const formUsuario = document.getElementById('form-usuario');
+        const pasoEmpresa = document.getElementById('paso-empresa');
+        const pasoUsuario = document.getElementById('paso-usuario');
+        const btnAtras = document.getElementById('btn-atras');
 
-            formEmpresa.addEventListener('submit', (e) => {
-                e.preventDefault();
-                pasoEmpresa.classList.add('d-none');
-                pasoUsuario.classList.remove('d-none');
-            });
+        let restauranteData = {}; // Objeto para guardar los datos del primer paso
 
-            btnAtras.addEventListener('click', () => {
-                pasoUsuario.classList.add('d-none');
-                pasoEmpresa.classList.remove('d-none');
-            });
+        // Evento para pasar del paso 1 al paso 2
+        formEmpresa.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Guardar los datos del primer formulario
+            restauranteData = {
+                nombre: document.getElementById('nombre-negocio').value,
+                numeroMesas: document.getElementById('mesas-cantidad').value,
+                telefono: document.getElementById('telefono-negocio').value,
+                direccion: "N/A",
+                logo: ""
+            };
 
-            formUsuario.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const nombreNegocio = document.getElementById('nombre-negocio').value;
-                const mesasCantidad = document.getElementById('mesas-cantidad').value;
-                const telefonoNegocio = document.getElementById('telefono-negocio').value;
-
-                const nombreUsuario = document.getElementById('nombre-usuario').value;
-                const correoUsuario = document.getElementById('correo-usuario').value;
-                const passwordUsuario = document.getElementById('password-usuario').value;
-
-                // Paso 1: Registrar el negocio
-                try {
-                    const responseNegocio = await fetch('./api/registrar_datos_local.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            nombre: nombreNegocio,
-                            mesas: mesasCantidad,
-                            telefono: telefonoNegocio,
-                            logo: '' // Puedes dejar esto vacío por ahora
-                        })
-                    });
-
-                    if (!responseNegocio.ok) throw new Error('Error al registrar el restaurante.');
-                    const resultNegocio = await responseNegocio.json();
-                    if (resultNegocio.error) throw new Error(resultNegocio.error);
-                    
-                } catch (error) {
-                    alert(`Error en el registro del restaurante: ${error.message}`);
-                    return;
-                }
-
-                // Paso 2: Registrar el usuario administrador
-                try {
-                    const responseUsuario = await fetch('./api/registrar_usuario.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            nombre: nombreUsuario,
-                            correo: correoUsuario,
-                            password: passwordUsuario,
-                            funcion: 'administrador',
-                            telefono: 'N/A' // O puedes pedirlo en el formulario
-                        })
-                    });
-
-                    if (!responseUsuario.ok) throw new Error('Error al registrar el usuario.');
-                    const resultUsuario = await responseUsuario.json();
-                    if (resultUsuario.error) throw new Error(resultUsuario.error);
-                    
-                    alert("Registro completado. ¡Bienvenido!");
-                    window.location.href = 'mesas.html'; // Redirigir a la página de mesas
-                } catch (error) {
-                    alert(`Error en el registro del usuario: ${error.message}`);
-                    return;
-                }
-            });
+            pasoEmpresa.classList.add('d-none');
+            pasoUsuario.classList.remove('d-none');
         });
-    </script>
+
+        // Evento para volver al paso 1
+        btnAtras.addEventListener('click', () => {
+            pasoUsuario.classList.add('d-none');
+            pasoEmpresa.classList.remove('d-none');
+        });
+
+        // Evento para enviar todos los datos en el paso 2
+        formUsuario.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Datos del usuario administrador
+            const userData = {
+                nombre: document.getElementById('nombre-usuario').value,
+                correo: document.getElementById('correo-usuario').value,
+                password: document.getElementById('password-usuario').value,
+                rol: "administrador",
+                telefono: "N/A"
+            };
+
+            // Paso 1: Registrar el negocio
+            try {
+                const responseNegocio = await fetch('../api/registrar_datos_local.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(restauranteData)
+                });
+
+                const resultNegocio = await responseNegocio.json();
+                if (!resultNegocio.success) throw new Error(resultNegocio.error);
+                
+            } catch (error) {
+                alert(`Error en el registro del restaurante: ${error.message}`);
+                return;
+            }
+
+            // Paso 2: Registrar el usuario administrador
+            try {
+                const responseUsuario = await fetch('../api/registrar_usuario.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+
+                const resultUsuario = await responseUsuario.json();
+                if (!resultUsuario.success) throw new Error(resultUsuario.error);
+                
+                alert("Registro completado. ¡Bienvenido!");
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                alert(`Error en el registro del usuario: ${error.message}`);
+                return;
+            }
+        });
+    });
+</script>
 </body>
 </html>

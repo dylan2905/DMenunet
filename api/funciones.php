@@ -10,9 +10,9 @@ function conectarBaseDatos() {
     $charset = 'utf8mb4';
 
     $options = [
-        \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
-        \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_OBJ,
-        \PDO::ATTR_EMULATE_PREPARES   => false,
+        \PDO::ATTR_ERRMODE              => \PDO::ERRMODE_EXCEPTION,
+        \PDO::ATTR_DEFAULT_FETCH_MODE   => \PDO::FETCH_OBJ,
+        \PDO::ATTR_EMULATE_PREPARES     => false,
     ];
     $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
     try {
@@ -470,7 +470,7 @@ function eliminarUsuario($idUsuario){
 function editarUsuario($usuario){
     $bd = conectarBaseDatos();
     $sentencia = $bd->prepare("UPDATE usuarios SET correo = ?, nombre = ?, telefono = ?, rol = ? WHERE id = ?" );
-    return $sentencia->execute([$usuario->correo, $usuario->nombre, $usuario->telefono, $usuario->rol, $usuario->id]);  
+    return $sentencia->execute([$usuario->correo, $usuario->nombre, $usuario->telefono, $usuario->rol, $usuario->id]);   
 }
 
 function obtenerUsuarioPorId($idUsuario){
@@ -528,8 +528,28 @@ function actualizarInformacionLocal($datos){
 
 function registrarInformacionLocal($datos){
     $bd = conectarBaseDatos();
-    $sentencia = $bd->prepare("INSERT INTO informacion_negocio (id, nombre, telefono, direccion, numeroMesas, logo) VALUES (1, ?,?,?,?,?)");
-    return $sentencia->execute([$datos->nombre, $datos->telefono, $datos->direccion, $datos->numeroMesas, $datos->logo]);
+
+    // 1. Verificar si ya existe un registro de información del negocio
+    $sentencia = $bd->query("SELECT COUNT(*) as count FROM informacion_negocio");
+    $resultado = $sentencia->fetch(PDO::FETCH_ASSOC);
+
+    if ($resultado['count'] == 0) {
+        // No hay registros, entonces hacemos un INSERT
+        $query = "INSERT INTO informacion_negocio (nombre, telefono, direccion, numeroMesas, logo) VALUES (?, ?, ?, ?, ?)";
+    } else {
+        // Ya existe un registro, entonces hacemos un UPDATE
+        $query = "UPDATE informacion_negocio SET nombre = ?, telefono = ?, direccion = ?, numeroMesas = ?, logo = ? WHERE id = 1";
+    }
+
+    $sentencia = $bd->prepare($query);
+    
+    return $sentencia->execute([
+        $datos->nombre, 
+        $datos->telefono, 
+        $datos->direccion, 
+        $datos->numeroMesas, 
+        $datos->logo
+    ]);
 }
 
 function obtenerInformacionLocal(){
@@ -544,7 +564,7 @@ function obtenerImagen($imagen){
     $imagen = str_replace(' ', '+', $imagen);
     $data = base64_decode($imagen);
     $file = DIRECTORIO. uniqid() . '.png';
-                
+                  
     $insertar = file_put_contents($file, $data);
     return $file;
 }
@@ -576,17 +596,17 @@ function obtenerInsumos($filtros){
     LEFT JOIN categorias ON categorias.id = insumos.categoria WHERE 1 ";
 
     if($filtros->tipo != "") {
-        $sql .= " AND  insumos.tipo = ?";
+        $sql .= " AND   insumos.tipo = ?";
         array_push($valoresAEjecutar, $filtros->tipo);
     }
 
     if($filtros->categoria != "") {
-        $sql .= " AND  insumos.categoria = ?";
+        $sql .= " AND   insumos.categoria = ?";
         array_push($valoresAEjecutar, $filtros->categoria);
     }
 
     if($filtros->nombre != "") {
-        $sql .= " AND  (insumos.nombre LIKE ? OR insumos.codigo LIKE ?)";
+        $sql .= " AND   (insumos.nombre LIKE ? OR insumos.codigo LIKE ?)";
         array_push($valoresAEjecutar, '%'.$filtros->nombre.'%');
         array_push($valoresAEjecutar, '%'.$filtros->nombre.'%');
     }
