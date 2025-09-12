@@ -38,125 +38,382 @@
                 <li class="nav-item">
                     <a class="nav-link active" href="ajustes.html"><i class="bi bi-gear"></i> Ajustes</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="caja.html"><i class="bi bi-cash-stack"></i> Caja</a>
+                </li>                
             </ul>
-            <a href="logout.php" class="btn btn-outline-light">
+            <a href="/api/logout.php" class="btn btn-outline-light">
                 <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
             </a>
         </div>
     </div>
 </nav>
 
+<div class="container mt-5">
+    <h2 class="text-center">Ajustes del Local</h2>
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
 
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="card shadow-lg">
-                    <div class="card-header bg-primary text-white text-center">
-                        <h4 class="mb-0">Ajustes del Restaurante</h4>
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab" aria-controls="general" aria-selected="true">
+                                <i class="bi bi-gear me-2"></i>General
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="facturacion-tab" data-bs-toggle="tab" data-bs-target="#facturacion" type="button" role="tab" aria-controls="facturacion" aria-selected="false">
+                                <i class="bi bi-receipt me-2"></i>Facturación
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios" type="button" role="tab" aria-controls="usuarios" aria-selected="false">
+                                <i class="bi bi-people me-2"></i>Usuarios
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content mt-4" id="myTabContent">
+
+                        <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+                            <h5 class="card-title">Información del Restaurante</h5>
+                            <p class="text-muted">Configura la información básica de tu restaurante.</p>
+                            <form id="form-general">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="nombre-restaurante" class="form-label">Nombre del Restaurante</label>
+                                        <input type="text" class="form-control" id="nombre-restaurante" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="telefono-restaurante" class="form-label">Teléfono</label>
+                                        <input type="tel" class="form-control" id="telefono-restaurante">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="email-restaurante" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email-restaurante">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="ruc-nit-restaurante" class="form-label">RUC/NIT</label>
+                                        <input type="text" class="form-control" id="ruc-nit-restaurante">
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="direccion-restaurante" class="form-label">Dirección</label>
+                                        <input type="text" class="form-control" id="direccion-restaurante">
+                                    </div>
+                                </div>
+                                <div class="d-grid mt-4">
+                                    <button type="submit" class="btn btn-primary"><i class="bi bi-save-fill me-2"></i>Guardar Cambios</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="facturacion" role="tabpanel" aria-labelledby="facturacion-tab">
+                            <h5 class="card-title">Configuración de Impuestos</h5>
+                            <p class="text-muted">Crea y gestiona los impuestos para tu facturación.</p>
+                            <form id="form-impuestos">
+                                <div id="impuestos-container">
+                                    </div>
+                                <div class="d-flex justify-content-start mt-3">
+                                    <button type="button" class="btn btn-outline-success" id="btn-add-impuesto"><i class="bi bi-plus-circle me-2"></i>Agregar Impuesto</button>
+                                </div>
+                                <div class="d-grid mt-4">
+                                    <button type="submit" class="btn btn-primary"><i class="bi bi-save-fill me-2"></i>Guardar Impuestos</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="usuarios" role="tabpanel" aria-labelledby="usuarios-tab">
+                            <h5 class="card-title">Gestión de Usuarios</h5>
+                            <p class="text-muted">Crea y gestiona los usuarios del sistema.</p>
+                            <div class="d-flex justify-content-end mb-3">
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#crearUsuarioModal">
+                                    <i class="bi bi-person-plus me-2"></i>Crear Nuevo Usuario
+                                </button>
+                            </div>
+
+                            <div id="lista-usuarios" class="mt-4">
+                                <p class="text-muted text-center">No hay usuarios registrados.</p>
+                            </div>
+                        </div>
+
                     </div>
-                    <div class="card-body p-4">
-                        <form id="form-ajustes">
-                            <div class="mb-3">
-                                <label for="nombre-negocio" class="form-label">Nombre del Restaurante</label>
-                                <input type="text" class="form-control" id="nombre-negocio" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="mesas-cantidad" class="form-label">Cantidad de Mesas</label>
-                                <input type="number" class="form-control" id="mesas-cantidad" min="1" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="telefono-negocio" class="form-label">Teléfono</label>
-                                <input type="tel" class="form-control" id="telefono-negocio">
-                            </div>
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary"><i class="bi bi-save-fill me-2"></i>Guardar Cambios</button>
-                            </div>
-                        </form>
-                    </div>
-                    <div id="alert-container" class="mt-3 mx-4"></div>
                 </div>
+                <div id="alert-container" class="mt-3 mx-4 mb-4"></div>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const formAjustes = document.getElementById('form-ajustes');
-            const nombreInput = document.getElementById('nombre-negocio');
-            const mesasInput = document.getElementById('mesas-cantidad');
-            const telefonoInput = document.getElementById('telefono-negocio');
-            const alertContainer = document.getElementById('alert-container');
+<div class="modal fade" id="crearUsuarioModal" tabindex="-1" aria-labelledby="crearUsuarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="crearUsuarioModalLabel">Crear Nuevo Usuario</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-crear-usuario">
+                    <div class="mb-3">
+                        <label for="nombre-completo" class="form-label">Nombre Completo</label>
+                        <input type="text" class="form-control" id="nombre-completo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefono-usuario" class="form-label">Teléfono</label>
+                        <input type="tel" class="form-control" id="telefono-usuario">
+                    </div>
+                    <div class="mb-3">
+                        <label for="correo-usuario" class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" id="correo-usuario" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="rol-usuario" class="form-label">Rol</label>
+                        <select class="form-select" id="rol-usuario" required>
+                            <option value="" disabled selected>Seleccione un rol</option>
+                            <option value="administrador">Administrador</option>
+                            <option value="mesero">Mesero</option>
+                            <option value="cajero">Cajero</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contrasena-usuario" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="contrasena-usuario" required>
+                        <div class="form-text">
+                            Debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial (*+-#).
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="validar-contrasena" class="form-label">Validar Contraseña</label>
+                        <input type="password" class="form-control" id="validar-contrasena" required>
+                        <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-success"><i class="bi bi-person-plus-fill me-2"></i>Crear Usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-            // Función para mostrar alertas
-            const showAlert = (message, type) => {
-                alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                                                ${message}
-                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                            </div>`;
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const formGeneral = document.getElementById('form-general');
+        const formImpuestos = document.getElementById('form-impuestos');
+        const formCrearUsuario = document.getElementById('form-crear-usuario');
+        const alertContainer = document.getElementById('alert-container');
+        const impuestosContainer = document.getElementById('impuestos-container');
+        const btnAddImpuesto = document.getElementById('btn-add-impuesto');
+        const passwordInput = document.getElementById('contrasena-usuario');
+        const confirmPasswordInput = document.getElementById('validar-contrasena');
+
+        // Función para mostrar alertas
+        const showAlert = (message, type) => {
+            alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>`;
+        };
+
+        // --- Lógica para la Pestaña "General" ---
+
+        const cargarDatosGenerales = async () => {
+            try {
+                const response = await fetch('./api/obtener_datos_local.php');
+                if (!response.ok) throw new Error('No se pudo obtener la configuración del restaurante.');
+                const data = await response.json();
+                
+                if (data.error) throw new Error(data.error);
+
+                document.getElementById('nombre-restaurante').value = data.nombre || '';
+                document.getElementById('telefono-restaurante').value = data.telefono || '';
+                document.getElementById('email-restaurante').value = data.email || '';
+                document.getElementById('ruc-nit-restaurante').value = data.ruc_nit || '';
+                document.getElementById('direccion-restaurante').value = data.direccion || '';
+            } catch (error) {
+                showAlert(`Error al cargar los datos generales: ${error.message}`, 'danger');
+                console.error('Error al cargar datos generales:', error);
+            }
+        };
+
+        formGeneral.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const datosActualizados = {
+                nombre: document.getElementById('nombre-restaurante').value,
+                telefono: document.getElementById('telefono-restaurante').value,
+                email: document.getElementById('email-restaurante').value,
+                ruc_nit: document.getElementById('ruc-nit-restaurante').value,
+                direccion: document.getElementById('direccion-restaurante').value,
             };
 
-            // Paso 1: Cargar los datos actuales del restaurante
-            async function cargarDatos() {
-                try {
-                    const response = await fetch('./api/obtener_datos_local.php');
-                    if (!response.ok) {
-                        throw new Error('No se pudo obtener la configuración del restaurante.');
-                    }
-                    const data = await response.json();
-                    
-                    if (data.error) {
-                        throw new Error(data.error);
-                    }
-
-                    // Rellenar el formulario con los datos actuales
-                    nombreInput.value = data.nombre || '';
-                    mesasInput.value = data.mesas || '';
-                    telefonoInput.value = data.telefono || '';
-                    
-                } catch (error) {
-                    showAlert(`Error al cargar los datos: ${error.message}`, 'danger');
-                    console.error('Error al cargar datos:', error);
+            try {
+                const response = await fetch('./api/actualizar_informacion_local.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosActualizados)
+                });
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    showAlert('¡Ajustes generales guardados correctamente!', 'success');
+                } else {
+                    throw new Error(result.message || 'Error al guardar los cambios generales.');
                 }
+            } catch (error) {
+                showAlert(`Hubo un problema al guardar los ajustes generales: ${error.message}`, 'danger');
+                console.error('Error al guardar ajustes generales:', error);
             }
+        });
 
-            // Paso 2: Manejar el envío del formulario para actualizar los datos
-            formAjustes.addEventListener('submit', async (e) => {
-                e.preventDefault();
+        // --- Lógica para la Pestaña "Facturación" ---
 
-                const datosActualizados = {
-                    nombre: nombreInput.value,
-                    mesas: parseInt(mesasInput.value),
-                    telefono: telefonoInput.value,
-                    logo: '' 
-                };
+        const addImpuestoField = (nombre = '', valor = '') => {
+            const rowId = `impuesto-${Date.now()}`;
+            const newRow = document.createElement('div');
+            newRow.className = 'row g-3 mb-3 align-items-end';
+            newRow.id = rowId;
+            newRow.innerHTML = `
+                <div class="col-md-5">
+                    <label for="impuesto-nombre-${rowId}" class="form-label">Nombre del Impuesto</label>
+                    <input type="text" class="form-control impuesto-nombre" value="${nombre}" required>
+                </div>
+                <div class="col-md-5">
+                    <label for="impuesto-valor-${rowId}" class="form-label">Valor Porcentual (%)</label>
+                    <input type="number" class="form-control impuesto-valor" value="${valor}" min="0" max="100" step="0.01" required>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="button" class="btn btn-danger btn-sm btn-remove-impuesto" aria-label="Eliminar Impuesto">
+                        <i class="bi bi-dash-circle"></i>
+                    </button>
+                </div>
+            `;
+            impuestosContainer.appendChild(newRow);
+            newRow.querySelector('.btn-remove-impuesto').addEventListener('click', () => {
+                newRow.remove();
+            });
+        };
 
-                try {
-                    const response = await fetch('./api/actualizar_informacion_local.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(datosActualizados)
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Error al guardar los cambios.');
-                    }
-                    
-                    const result = await response.json();
-                    if (result.success) {
-                        showAlert('¡Ajustes guardados correctamente!', 'success');
-                    } else {
-                        throw new Error(result.message || 'Error desconocido.');
-                    }
-                } catch (error) {
-                    showAlert(`Hubo un problema al guardar: ${error.message}`, 'danger');
-                    console.error('Error al guardar:', error);
+        const cargarImpuestos = async () => {
+            try {
+                const response = await fetch('./api/obtener_impuestos.php');
+                if (!response.ok) throw new Error('No se pudo obtener la configuración de impuestos.');
+                const data = await response.json();
+                
+                if (data.error) throw new Error(data.error);
+                
+                impuestosContainer.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(impuesto => addImpuestoField(impuesto.nombre, impuesto.valor));
+                } else {
+                    addImpuestoField();
                 }
+            } catch (error) {
+                showAlert(`Error al cargar los impuestos: ${error.message}`, 'danger');
+                console.error('Error al cargar impuestos:', error);
+            }
+        };
+
+        btnAddImpuesto.addEventListener('click', () => addImpuestoField());
+
+        formImpuestos.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const impuestos = [];
+            const impuestoRows = impuestosContainer.querySelectorAll('.row');
+            impuestoRows.forEach(row => {
+                const nombreInput = row.querySelector('.impuesto-nombre');
+                const valorInput = row.querySelector('.impuesto-valor');
+                impuestos.push({
+                    nombre: nombreInput.value,
+                    valor: parseFloat(valorInput.value)
+                });
             });
 
-            // Cargar los datos cuando la página se abra
-            cargarDatos();
+            try {
+                const response = await fetch('./api/actualizar_impuestos.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(impuestos)
+                });
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    showAlert('¡Impuestos guardados correctamente!', 'success');
+                } else {
+                    throw new Error(result.message || 'Error al guardar los impuestos.');
+                }
+            } catch (error) {
+                showAlert(`Hubo un problema al guardar los impuestos: ${error.message}`, 'danger');
+                console.error('Error al guardar impuestos:', error);
+            }
         });
-    </script>
+
+        // --- Lógica para la Pestaña "Usuarios" ---
+
+        const validarContrasena = (password) => {
+            const minLength = 8;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSpecialChar = /[*+-#]/.test(password);
+
+            return password.length >= minLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+        };
+
+        formCrearUsuario.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Validar la seguridad de la contraseña
+            if (!validarContrasena(password)) {
+                showAlert('La contraseña no cumple con los requisitos de seguridad.', 'warning');
+                return;
+            }
+
+            // Validar que las contraseñas coincidan
+            if (password !== confirmPassword) {
+                confirmPasswordInput.classList.add('is-invalid');
+                showAlert('Las contraseñas no coinciden.', 'warning');
+                return;
+            } else {
+                confirmPasswordInput.classList.remove('is-invalid');
+            }
+
+            const nuevoUsuario = {
+                nombre_completo: document.getElementById('nombre-completo').value,
+                telefono: document.getElementById('telefono-usuario').value,
+                correo: document.getElementById('correo-usuario').value,
+                contrasena: password,
+                rol: document.getElementById('rol-usuario').value
+            };
+
+            try {
+                const response = await fetch('./api/crear_usuario.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(nuevoUsuario)
+                });
+                
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    showAlert('¡Usuario creado correctamente!', 'success');
+                    // Opcional: Cerrar el modal o resetear el formulario
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('crearUsuarioModal'));
+                    modal.hide();
+                    formCrearUsuario.reset();
+                } else {
+                    throw new Error(result.message || 'Error al crear el usuario.');
+                }
+            } catch (error) {
+                showAlert(`Hubo un problema al crear el usuario: ${error.message}`, 'danger');
+                console.error('Error al crear usuario:', error);
+            }
+        });
+
+        // Cargar los datos al iniciar la página
+        cargarDatosGenerales();
+        cargarImpuestos();
+    });
+</script>
 </body>
 </html>

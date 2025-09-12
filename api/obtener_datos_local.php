@@ -1,18 +1,26 @@
 <?php
-include_once "encabezado.php";
+header('Content-Type: application/json');
 include_once "funciones.php";
 
-$informacion = obtenerInformacionLocal();
+try {
+    $bd = conectarBaseDatos();
+    $sentencia = $bd->prepare("SELECT nombre, telefono, email, ruc_nit, direccion FROM informacion_negocio LIMIT 1");
+    $sentencia->execute();
+    $data = $sentencia->fetch(PDO::FETCH_ASSOC);
 
+    if ($data) {
+        echo json_encode($data);
+    } else {
+        echo json_encode([
+            'nombre' => '',
+            'telefono' => '',
+            'email' => '',
+            'ruc_nit' => '',
+            'direccion' => ''
+        ]);
+    }
 
-if(count($informacion) < 1){
-    $informacion = [
-        "nombre" => "Menunet",
-        "telefono" => "1111111111",
-        "numeroMesas" => "5",
-        "logo" => "/fotos/logo.png"
-    ];
-} else {
-    $informacion = $informacion[0];
+} catch (PDOException $e) {
+    echo json_encode(['success' => false, 'error' => 'Error de conexión a la base de datos: ' . $e->getMessage()]);
 }
-echo json_encode($informacion);
+?>

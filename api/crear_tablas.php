@@ -6,7 +6,7 @@ $host = "localhost";
 $usuario = "root";
 $password = "";
 $resultados = [];
-$nombre_bd = "DMenunet";
+$nombre_bd = "Dmenunet";
 
 try {
     // Conectar al servidor para crear la base de datos si no existe
@@ -16,34 +16,59 @@ try {
     if ($creada_bd !== false) {
         array_push($resultados, "Base de datos '$nombre_bd' creada correctamente o ya existe.");
     }
-    
+
     // Conectar a la base de datos recién creada
     $conexion = new PDO("mysql:host=$host;dbname=$nombre_bd", $usuario, $password);
     $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Definición de las sentencias para crear las tablas
-    $sentencias = [ 
+    $sentencias = [
         ["tabla" => "usuarios",
-         "sentencia" => 'CREATE TABLE IF NOT EXISTS usuarios(
+        "sentencia" => 'CREATE TABLE IF NOT EXISTS usuarios(
             id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
             correo VARCHAR(100) NOT NULL,
             nombre VARCHAR(100) NOT NULL,
             telefono VARCHAR(20) NOT NULL,
-            password VARCHAR(255) NOT NULL,
+            contrasena_hash VARCHAR(255) NOT NULL,
             rol VARCHAR(20) NOT NULL
         );'],
-        
+
         ["tabla" => "informacion_negocio",
-         "sentencia" => 'CREATE TABLE IF NOT EXISTS informacion_negocio(
+        "sentencia" => 'CREATE TABLE IF NOT EXISTS informacion_negocio(
+            id INT PRIMARY KEY,
             nombre VARCHAR(100),
             telefono VARCHAR(15),
+            email VARCHAR(255),
+            ruc_nit VARCHAR(50),
             direccion VARCHAR(255),
-            numeroMesas TINYINT,
             logo VARCHAR(255)
         );'],
 
+        ["tabla" => "impuestos",
+        "sentencia" => 'CREATE TABLE IF NOT EXISTS impuestos(
+            id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+            nombre VARCHAR(100) NOT NULL,
+            valor DECIMAL(5,2) NOT NULL
+        );'],
+
+        ["tabla" => "cajas",
+        "sentencia" => 'CREATE TABLE IF NOT EXISTS cajas(
+            id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+            monto_inicial DECIMAL(10,2) NOT NULL,
+            fecha_apertura DATETIME NOT NULL,
+            fecha_cierre DATETIME NULL,
+            estado ENUM("abierta", "cerrada") NOT NULL,
+            ventas_totales DECIMAL(10,2) NULL,
+            ventas_efectivo DECIMAL(10,2) NULL,
+            ventas_tarjeta DECIMAL(10,2) NULL,
+            ventas_bonos DECIMAL(10,2) NULL,
+            ventas_transferencia DECIMAL(10,2) NULL,
+            efectivo_contado DECIMAL(10,2) NULL,
+            diferencia DECIMAL(10,2) NULL
+        );'],
+
         ["tabla" => "categorias",
-         "sentencia" => 'CREATE TABLE IF NOT EXISTS categorias(
+        "sentencia" => 'CREATE TABLE IF NOT EXISTS categorias(
             id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
             nombre VARCHAR(50) NOT NULL,
             tipo VARCHAR(50) NOT NULL,
@@ -51,7 +76,7 @@ try {
         );'],
 
         ["tabla" => "grupos",
-         "sentencia" => 'CREATE TABLE IF NOT EXISTS grupos(
+        "sentencia" => 'CREATE TABLE IF NOT EXISTS grupos(
             id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
             id_categoria BIGINT UNSIGNED NOT NULL,
             nombre VARCHAR(100) NOT NULL,
@@ -59,7 +84,7 @@ try {
         );'],
 
         ["tabla" => "subgrupos",
-         "sentencia" => 'CREATE TABLE IF NOT EXISTS subgrupos(
+        "sentencia" => 'CREATE TABLE IF NOT EXISTS subgrupos(
             id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
             id_grupo BIGINT UNSIGNED NOT NULL,
             nombre VARCHAR(100) NOT NULL,
@@ -67,7 +92,7 @@ try {
         );'],
 
         ["tabla" => "sub_subgrupos",
-         "sentencia" => 'CREATE TABLE IF NOT EXISTS sub_subgrupos(
+        "sentencia" => 'CREATE TABLE IF NOT EXISTS sub_subgrupos(
             id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
             id_subgrupo BIGINT UNSIGNED NOT NULL,
             nombre VARCHAR(100) NOT NULL,
@@ -75,9 +100,9 @@ try {
         );'],
 
         ["tabla" => "insumos",
-         "sentencia" => 'CREATE TABLE IF NOT EXISTS insumos(
+        "sentencia" => 'CREATE TABLE IF NOT EXISTS insumos(
             id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-            codigo VARCHAR(100) NOT NULL,
+            codigo VARCHAR(100) NOT NULL UNIQUE,
             nombre VARCHAR(100) NOT NULL,
             descripcion VARCHAR(255) NOT NULL,
             precio DECIMAL(6,2) NOT NULL,
@@ -87,13 +112,13 @@ try {
         );'],
 
         ["tabla" => "meseros",
-         "sentencia" => 'CREATE TABLE IF NOT EXISTS meseros(
+        "sentencia" => 'CREATE TABLE IF NOT EXISTS meseros(
             id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
             nombre VARCHAR(100) NOT NULL
         );'],
-        
+
         ["tabla" => "ventas",
-         "sentencia" => 'CREATE TABLE IF NOT EXISTS ventas(
+        "sentencia" => 'CREATE TABLE IF NOT EXISTS ventas(
             id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
             idMesa TINYINT NOT NULL,
             cliente VARCHAR(100),
@@ -105,7 +130,7 @@ try {
         );'],
 
         ["tabla" => "productos_venta",
-         "sentencia" => 'CREATE TABLE IF NOT EXISTS productos_venta(
+        "sentencia" => 'CREATE TABLE IF NOT EXISTS productos_venta(
             id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
             idInsumo BIGINT UNSIGNED NOT NULL,
             precio DECIMAL(6,2) NOT NULL,
@@ -119,37 +144,37 @@ try {
         $conexion->exec($sentencia["sentencia"]);
         array_push($resultados, "Tabla '{$sentencia["tabla"]}' creada o ya existe.");
     }
-    
+
     // Sentencias para crear las relaciones (claves foráneas)
     $sentencias_fk = [
         ["relacion" => "grupos_categorias",
-         "sentencia" => 'ALTER TABLE grupos ADD CONSTRAINT fk_grupos_categorias FOREIGN KEY (id_categoria) REFERENCES categorias(id) ON DELETE CASCADE;'],
-         
+        "sentencia" => 'ALTER TABLE grupos ADD CONSTRAINT fk_grupos_categorias FOREIGN KEY (id_categoria) REFERENCES categorias(id) ON DELETE CASCADE;'],
+
         ["relacion" => "subgrupos_grupos",
-         "sentencia" => 'ALTER TABLE subgrupos ADD CONSTRAINT fk_subgrupos_grupos FOREIGN KEY (id_grupo) REFERENCES grupos(id) ON DELETE CASCADE;'],
-         
+        "sentencia" => 'ALTER TABLE subgrupos ADD CONSTRAINT fk_subgrupos_grupos FOREIGN KEY (id_grupo) REFERENCES grupos(id) ON DELETE CASCADE;'],
+
         ["relacion" => "sub_subgrupos_subgrupos",
-         "sentencia" => 'ALTER TABLE sub_subgrupos ADD CONSTRAINT fk_sub_subgrupos_subgrupos FOREIGN KEY (id_subgrupo) REFERENCES subgrupos(id) ON DELETE CASCADE;'],
+        "sentencia" => 'ALTER TABLE sub_subgrupos ADD CONSTRAINT fk_sub_subgrupos_subgrupos FOREIGN KEY (id_subgrupo) REFERENCES subgrupos(id) ON DELETE CASCADE;'],
 
         ["relacion" => "insumos_subgrupos",
-         "sentencia" => 'ALTER TABLE insumos ADD CONSTRAINT fk_insumos_subgrupos FOREIGN KEY (id_subgrupo) REFERENCES subgrupos(id) ON DELETE RESTRICT;'],
+        "sentencia" => 'ALTER TABLE insumos ADD CONSTRAINT fk_insumos_subgrupos FOREIGN KEY (id_subgrupo) REFERENCES subgrupos(id) ON DELETE RESTRICT;'],
 
         ["relacion" => "insumos_sub_subgrupos",
-         "sentencia" => 'ALTER TABLE insumos ADD CONSTRAINT fk_insumos_sub_subgrupos FOREIGN KEY (id_sub_subgrupo) REFERENCES sub_subgrupos(id) ON DELETE RESTRICT;'],
-         
+        "sentencia" => 'ALTER TABLE insumos ADD CONSTRAINT fk_insumos_sub_subgrupos FOREIGN KEY (id_sub_subgrupo) REFERENCES sub_subgrupos(id) ON DELETE RESTRICT;'],
+
         ["relacion" => "ventas_usuarios",
-         "sentencia" => 'ALTER TABLE ventas ADD CONSTRAINT fk_ventas_usuarios FOREIGN KEY (idUsuario) REFERENCES usuarios(id) ON DELETE RESTRICT;'],
+        "sentencia" => 'ALTER TABLE ventas ADD CONSTRAINT fk_ventas_usuarios FOREIGN KEY (idUsuario) REFERENCES usuarios(id) ON DELETE RESTRICT;'],
 
         ["relacion" => "ventas_meseros",
-         "sentencia" => 'ALTER TABLE ventas ADD CONSTRAINT fk_ventas_meseros FOREIGN KEY (idMesero) REFERENCES meseros(id) ON DELETE SET NULL;'],
-         
+        "sentencia" => 'ALTER TABLE ventas ADD CONSTRAINT fk_ventas_meseros FOREIGN KEY (idMesero) REFERENCES meseros(id) ON DELETE SET NULL;'],
+
         ["relacion" => "productos_venta_insumos",
-         "sentencia" => 'ALTER TABLE productos_venta ADD CONSTRAINT fk_pv_insumos FOREIGN KEY (idInsumo) REFERENCES insumos(id) ON DELETE RESTRICT;'],
-         
+        "sentencia" => 'ALTER TABLE productos_venta ADD CONSTRAINT fk_pv_insumos FOREIGN KEY (idInsumo) REFERENCES insumos(id) ON DELETE RESTRICT;'],
+
         ["relacion" => "productos_venta_ventas",
-         "sentencia" => 'ALTER TABLE productos_venta ADD CONSTRAINT fk_pv_ventas FOREIGN KEY (idVenta) REFERENCES ventas(id) ON DELETE CASCADE;']
+        "sentencia" => 'ALTER TABLE productos_venta ADD CONSTRAINT fk_pv_ventas FOREIGN KEY (idVenta) REFERENCES ventas(id) ON DELETE CASCADE;']
     ];
-    
+
     // Intenta añadir las claves foráneas, ignorando errores si ya existen
     foreach ($sentencias_fk as $sentencia_fk) {
         try {
@@ -163,7 +188,7 @@ try {
             }
         }
     }
-    
+
 } catch (PDOException $e) {
     array_push($resultados, "Error: " . $e->getMessage());
 } finally {
@@ -172,13 +197,3 @@ try {
 
 echo json_encode($resultados);
 ?>
-
-
-
-// ALTER TABLE insumos
-ADD COLUMN categoria VARCHAR(255) NULL,
-ADD COLUMN grupo VARCHAR(255) NULL,
-ADD COLUMN subgrupo VARCHAR(255) NULL,
-ADD COLUMN sub_subgrupo VARCHAR(255) NULL,
-ADD COLUMN codigo VARCHAR(50) NOT NULL UNIQUE,
-ADD COLUMN detalle TEXT NULL;

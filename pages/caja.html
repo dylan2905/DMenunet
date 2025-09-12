@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caja - DMENUNET</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/index_prueba.html"><i class="bi bi-house me-2"></i>DMENUNET</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="inventario.html"><i class="bi bi-boxes"></i> Inventario</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="crear_producto.html"><i class="bi bi-plus-circle"></i> Crear Producto</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="mesas.html"><i class="bi bi-shop"></i> Mesas</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="pedidos.html"><i class="bi bi-receipt"></i> Pedidos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="historial_ventas.html"><i class="bi bi-clock-history"></i> Historial de Ventas</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="ajustes.html"><i class="bi bi-gear"></i> Ajustes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="caja.html"><i class="bi bi-cash-stack"></i> Caja</a>
+                </li>
+            </ul>
+            <a href="/api/logout.php" class="btn btn-outline-light">
+                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Gestión de Caja</h2>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-receipt me-2"></i>Facturas</h5>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" placeholder="Buscar por número de factura o cliente..." aria-label="Buscar factura">
+                        <button class="btn btn-outline-secondary" type="button"><i class="bi bi-search"></i></button>
+                    </div>
+                    <div id="lista-facturas">
+                        <div class="card border mb-2">
+                            <div class="card-body p-3">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <p class="mb-0"><strong>FAC-2024-001</strong> <span class="badge bg-success">Pagado</span></p>
+                                        <p class="text-muted mb-0">Cliente: Juan Pérez</p>
+                                        <p class="text-muted mb-0">Total: <strong>$52.25</strong></p>
+                                    </div>
+                                    <div class="col-auto text-end">
+                                        <p class="mb-0 text-muted">Mesa 2</p>
+                                        <p class="mb-0 text-muted">Fecha: 12/9/2025</p>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button class="btn btn-sm btn-primary" title="Ver detalles"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-success" title="Descargar"><i class="bi bi-download"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-cash-stack me-2"></i>Caja Registradora</h5>
+                    <div id="caja-cerrada" class="text-center p-5">
+                        <i class="bi bi-clock-history display-4 text-muted"></i>
+                        <h6 class="mt-3 text-muted">No hay caja abierta</h6>
+                        <form id="form-abrir-caja" class="mt-4">
+                            <div class="mb-3">
+                                <label for="monto-inicial" class="form-label">Monto Inicial</label>
+                                <input type="number" class="form-control" id="monto-inicial" value="0.00" min="0" step="0.01" required>
+                            </div>
+                            <button type="submit" class="btn btn-success d-block w-100" id="btn-abrir-caja">Abrir Caja</button>
+                        </form>
+                    </div>
+
+                    <div id="caja-abierta" class="d-none">
+                        <div class="mb-3">
+                            <strong>Estado:</strong> <span class="badge bg-success">Abierta</span>
+                            <span class="ms-3 text-muted" id="horario-caja"></span>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <p class="mb-0 text-muted">Monto Inicial:</p>
+                                <h4 class="mb-0" id="monto-inicial-display">$0.00</h4>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row text-center mb-3">
+                            <div class="col">
+                                <p class="mb-0 text-muted">Ventas Totales</p>
+                                <h5 id="ventas-totales">$0.00</h5>
+                            </div>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <p class="mb-0 text-muted">Pagos en Efectivo</p>
+                                <h6 id="pagos-efectivo">$0.00</h6>
+                            </div>
+                            <div class="col-6">
+                                <p class="mb-0 text-muted">Pagos con Tarjeta</p>
+                                <h6 id="pagos-tarjeta">$0.00</h6>
+                            </div>
+                        </div>
+                        <div class="row text-center mb-4">
+                            <div class="col-6">
+                                <p class="mb-0 text-muted">Pagos con Bonos</p>
+                                <h6 id="pagos-bonos">$0.00</h6>
+                            </div>
+                            <div class="col-6">
+                                <p class="mb-0 text-muted">Pagos con Transferencia</p>
+                                <h6 id="pagos-transferencia">$0.00</h6>
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cerrarCajaModal">Cerrar Caja</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-list-ul me-2"></i>Cajas del Día</h5>
+                    <div id="cajas-diarias-container">
+                        <div class="card border mb-2">
+                            <div class="card-body p-3">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <p class="mb-0"><strong>Cerrada</strong></p>
+                                        <p class="text-muted mb-0">12:00 p.m. - 3:00 p.m.</p>
+                                    </div>
+                                    <div class="col-auto text-end">
+                                        <p class="mb-0 text-muted">Inicial: $100.00</p>
+                                        <p class="mb-0 text-muted">Efectivo: $152.25</p>
+                                    </div>
+                                    <div class="col-auto text-end">
+                                        <p class="mb-0 text-muted">Ventas: $52.25</p>
+                                        <p class="mb-0 text-muted">Diferencia: <strong class="text-success">$0.00</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-muted text-center mt-3">No hay cajas cerradas hoy.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cerrarCajaModal" tabindex="-1" aria-labelledby="cerrarCajaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="cerrarCajaModalLabel">Cierre de Caja</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Ventas en efectivo esperadas:</strong> <span id="efectivo-esperado">$0.00</span></p>
+                <div class="mb-3">
+                    <label for="efectivo-contado" class="form-label">Efectivo contado:</label>
+                    <input type="number" class="form-control" id="efectivo-contado" min="0" step="0.01" required>
+                </div>
+                <div class="alert alert-info" role="alert">
+                    <p class="mb-0"><strong>Diferencia:</strong> <span id="diferencia-caja">$0.00</span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btn-confirmar-cierre">Confirmar Cierre</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cajaCerradaDiv = document.getElementById('caja-cerrada');
+        const cajaAbiertaDiv = document.getElementById('caja-abierta');
+        const formAbrirCaja = document.getElementById('form-abrir-caja');
+        const montoInicialInput = document.getElementById('monto-inicial');
+        const montoInicialDisplay = document.getElementById('monto-inicial-display');
+        const horarioCajaDisplay = document.getElementById('horario-caja');
+        const efectivoEsperadoDisplay = document.getElementById('efectivo-esperado');
+        const efectivoContadoInput = document.getElementById('efectivo-contado');
+        const diferenciaCajaDisplay = document.getElementById('diferencia-caja');
+        const btnConfirmarCierre = document.getElementById('btn-confirmar-cierre');
+
+        // Simulamos un objeto de estado de caja
+        let estadoCaja = {
+            abierta: false,
+            montoInicial: 0,
+            ventas: {
+                efectivo: 0,
+                tarjeta: 0,
+                bonos: 0,
+                transferencia: 0
+            },
+            horaApertura: null
+        };
+
+        // --- Funciones para manejar la UI y la lógica de negocio ---
+
+        const actualizarDashboardCaja = () => {
+            document.getElementById('ventas-totales').textContent = `$${(estadoCaja.ventas.efectivo + estadoCaja.ventas.tarjeta + estadoCaja.ventas.bonos + estadoCaja.ventas.transferencia).toFixed(2)}`;
+            document.getElementById('pagos-efectivo').textContent = `$${estadoCaja.ventas.efectivo.toFixed(2)}`;
+            document.getElementById('pagos-tarjeta').textContent = `$${(estadoCaja.ventas.tarjeta + estadoCaja.ventas.transferencia).toFixed(2)}`;
+            document.getElementById('pagos-bonos').textContent = `$${estadoCaja.ventas.bonos.toFixed(2)}`;
+            
+            // Si la caja está abierta, mostramos los datos correspondientes
+            if (estadoCaja.abierta) {
+                montoInicialDisplay.textContent = `$${estadoCaja.montoInicial.toFixed(2)}`;
+                horarioCajaDisplay.textContent = `Abierta desde: ${new Date(estadoCaja.horaApertura).toLocaleTimeString()}`;
+            }
+        };
+
+        const cambiarVistaCaja = () => {
+            if (estadoCaja.abierta) {
+                cajaCerradaDiv.classList.add('d-none');
+                cajaAbiertaDiv.classList.remove('d-none');
+            } else {
+                cajaAbiertaDiv.classList.add('d-none');
+                cajaCerradaDiv.classList.remove('d-none');
+            }
+            actualizarDashboardCaja();
+        };
+
+        const calcularDiferencia = () => {
+            const efectivoEsperado = estadoCaja.montoInicial + estadoCaja.ventas.efectivo;
+            const efectivoContado = parseFloat(efectivoContadoInput.value) || 0;
+            const diferencia = efectivoContado - efectivoEsperado;
+
+            diferenciaCajaDisplay.textContent = `$${diferencia.toFixed(2)}`;
+            diferenciaCajaDisplay.className = '';
+            if (diferencia > 0) {
+                diferenciaCajaDisplay.classList.add('text-success');
+            } else if (diferencia < 0) {
+                diferenciaCajaDisplay.classList.add('text-danger');
+            } else {
+                diferenciaCajaDisplay.classList.add('text-info');
+            }
+        };
+
+        // --- Event Listeners ---
+
+        formAbrirCaja.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const montoInicial = parseFloat(montoInicialInput.value);
+
+            // Llamada simulada a la API para abrir caja
+            try {
+                const response = await fetch('./api/abrir_caja.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ montoInicial })
+                });
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    estadoCaja.abierta = true;
+                    estadoCaja.montoInicial = montoInicial;
+                    estadoCaja.horaApertura = Date.now();
+                    // Reiniciar ventas para el nuevo turno
+                    estadoCaja.ventas = { efectivo: 0, tarjeta: 0, bonos: 0, transferencia: 0 }; 
+                    cambiarVistaCaja();
+                    alert('Caja abierta con éxito.'); // Reemplazar con una alerta de Bootstrap si es necesario
+                } else {
+                    throw new Error(result.message || 'Error al abrir la caja.');
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                console.error('Error al abrir caja:', error);
+            }
+        });
+
+        btnConfirmarCierre.addEventListener('click', async () => {
+            const efectivoContado = parseFloat(efectivoContadoInput.value);
+            if (isNaN(efectivoContado)) {
+                alert('Por favor, ingrese el monto contado.');
+                return;
+            }
+
+            const efectivoEsperado = estadoCaja.montoInicial + estadoCaja.ventas.efectivo;
+            const diferencia = efectivoContado - efectivoEsperado;
+
+            // Llamada simulada a la API para cerrar caja
+            try {
+                const response = await fetch('./api/cerrar_caja.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        montoInicial: estadoCaja.montoInicial,
+                        efectivoContado,
+                        efectivoEsperado,
+                        diferencia,
+                        ventas: estadoCaja.ventas
+                    })
+                });
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    estadoCaja.abierta = false;
+                    cambiarVistaCaja();
+                    alert('Caja cerrada con éxito.'); // Reemplazar con una alerta de Bootstrap si es necesario
+                    // Cierra el modal de cierre
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('cerrarCajaModal'));
+                    modal.hide();
+                } else {
+                    throw new Error(result.message || 'Error al cerrar la caja.');
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                console.error('Error al cerrar caja:', error);
+            }
+        });
+
+        // Actualizar valores en el modal de cierre de caja
+        document.getElementById('cerrarCajaModal').addEventListener('show.bs.modal', () => {
+            efectivoEsperadoDisplay.textContent = `$${(estadoCaja.montoInicial + estadoCaja.ventas.efectivo).toFixed(2)}`;
+            efectivoContadoInput.value = '';
+            diferenciaCajaDisplay.textContent = '$0.00';
+            diferenciaCajaDisplay.className = 'text-info';
+        });
+
+        efectivoContadoInput.addEventListener('input', calcularDiferencia);
+
+        // --- Carga inicial del estado de la caja (simulada) ---
+
+        // Función simulada para cargar el estado de la caja desde el servidor
+        const cargarEstadoCaja = async () => {
+            // En un entorno real, harías una llamada a la API
+            // const response = await fetch('./api/obtener_estado_caja.php');
+            // const data = await response.json();
+            
+            // Aquí simulamos los datos para que veas el funcionamiento
+            const simulacion = {
+                abierta: true, // Cambia a false para probar el estado inicial
+                montoInicial: 100.00,
+                horaApertura: Date.now() - 3600000, // 1 hora antes
+                ventas: {
+                    efectivo: 52.25,
+                    tarjeta: 35.00,
+                    bonos: 15.00,
+                    transferencia: 10.00
+                }
+            };
+            
+            estadoCaja = simulacion;
+            cambiarVistaCaja();
+        };
+        
+        cargarEstadoCaja();
+    });
+</script>
+</body>
+</html>
