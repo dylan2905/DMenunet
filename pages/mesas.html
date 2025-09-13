@@ -3,18 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mesas - DMENUNET</title>
+    <title>Gestión de Mesas - DMENUNET</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        .table-card {
-            cursor: pointer;
+        body { background-color: #f8f9fa; }
+        .card-mesa {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%; /* Mesas circulares */
+            color: white;
+            font-weight: bold;
+            text-align: center;
             transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
         }
-        .table-card:hover {
+        .card-mesa:hover {
             transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
+        .bg-available { background-color: #28a745; } /* Verde */
+        .bg-occupied { background-color: #dc3545; } /* Rojo */
+        .bg-reserved { background-color: #ffc107; } /* Amarillo */
+        .bg-maintenance { background-color: #6c757d; } /* Gris */
     </style>
 </head>
 <body>
@@ -59,126 +74,270 @@
     </div>
 </nav>
 
-
-    <div class="container mt-5">
-        <h1 class="mb-4 text-center">Gestión de Mesas</h1>
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="mesas-grid">
-        </div>
-        <p id="loading-message" class="text-center mt-4">Cargando mesas...</p>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Gestión de Mesas</h1>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrearMesa">
+            <i class="bi bi-plus me-1"></i> Nueva Mesa
+        </button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const mesasGrid = document.getElementById('mesas-grid');
-            const loadingMessage = document.getElementById('loading-message');
+    <div class="row g-3 mb-4 text-center">
+        <div class="col">
+            <div class="card p-3 shadow-sm border-0">
+                <p class="mb-0 fs-5" id="total-mesas">0</p>
+                <small class="text-muted">Total</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card p-3 shadow-sm border-0">
+                <p class="mb-0 text-success fs-5" id="mesas-disponibles">0</p>
+                <small class="text-muted">Disponibles</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card p-3 shadow-sm border-0">
+                <p class="mb-0 text-danger fs-5" id="mesas-ocupadas">0</p>
+                <small class="text-muted">Ocupadas</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card p-3 shadow-sm border-0">
+                <p class="mb-0 text-warning fs-5" id="mesas-reservadas">0</p>
+                <small class="text-muted">Reservadas</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card p-3 shadow-sm border-0">
+                <p class="mb-0 text-secondary fs-5" id="mesas-mantenimiento">0</p>
+                <small class="text-muted">Mantenimiento</small>
+            </div>
+        </div>
+    </div>
 
-            async function obtenerMesasDelLocal() {
-                try {
-                    const response = await fetch('./api/obtener_datos_local.php');
-                    if (!response.ok) {
-                        throw new Error('Error al obtener los datos del local.');
-                    }
-                    const data = await response.json();
-                    
-                    if (data.error) {
-                        throw new Error(data.error);
-                    }
-                    
-                    const numMesas = parseInt(data.mesas);
-                    if (isNaN(numMesas) || numMesas <= 0) {
-                        mesasGrid.innerHTML = `<div class="col-12 text-center">
-                            <p class="text-danger">No se ha especificado la cantidad de mesas en la configuración del restaurante.</p>
-                            <a href="ajustes.html" class="btn btn-primary">Ir a Ajustes</a>
-                        </div>`;
-                        return;
-                    }
-                    
-                    renderMesas(numMesas);
-                    // Llama a la nueva función para obtener el estado de las mesas
-                    actualizarEstadoMesas(); 
+    <div class="card p-4 shadow-sm">
+        <h5 class="card-title">Plano del Restaurante</h5>
+        <p class="card-subtitle mb-3 text-muted">Haz clic en una mesa para cambiar su estado o ver detalles.</p>
+        <div class="d-flex flex-wrap gap-4 justify-content-center" id="mesas-container">
+            </div>
+        <div id="loading-message" class="text-center mt-4">Cargando mesas...</div>
+    </div>
+</div>
 
-                } catch (error) {
-                    mesasGrid.innerHTML = `<div class="col-12 text-center">
-                        <p class="text-danger">Hubo un problema al cargar la configuración del local: ${error.message}</p>
-                    </div>`;
-                    console.error('Error al obtener las mesas:', error);
-                } finally {
-                    loadingMessage.style.display = 'none';
+<div class="modal fade" id="modalCrearMesa" tabindex="-1" aria-labelledby="modalCrearMesaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCrearMesaLabel">Nueva Mesa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCrearMesa">
+                    <div class="mb-3">
+                        <label for="nueva-mesa-nombre" class="form-label">Nombre de la Mesa *</label>
+                        <input type="text" class="form-control" id="nueva-mesa-nombre" placeholder="Ej: Mesa 7" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nueva-mesa-capacidad" class="form-label">Capacidad *</label>
+                        <input type="number" class="form-control" id="nueva-mesa-capacidad" value="4" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nueva-mesa-ubicacion" class="form-label">Ubicación</label>
+                        <input type="text" class="form-control" id="nueva-mesa-ubicacion" placeholder="Ej: Ventana, Centro, Terraza">
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Mesa</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditarMesa" tabindex="-1" aria-labelledby="modalEditarMesaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarMesaLabel">Editar Mesa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarMesa">
+                    <input type="hidden" id="edit-mesa-id">
+                    <div class="mb-3">
+                        <label for="edit-mesa-nombre" class="form-label">Nombre de la Mesa *</label>
+                        <input type="text" class="form-control" id="edit-mesa-nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-mesa-capacidad" class="form-label">Capacidad *</label>
+                        <input type="number" class="form-control" id="edit-mesa-capacidad" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-mesa-ubicacion" class="form-label">Ubicación</label>
+                        <input type="text" class="form-control" id="edit-mesa-ubicacion" placeholder="Ej: Ventana, Centro, Terraza">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-mesa-estado" class="form-label">Estado *</label>
+                        <select id="edit-mesa-estado" class="form-select" required>
+                            <option value="disponible">Disponible</option>
+                            <option value="ocupada">Ocupada</option>
+                            <option value="reservada">Reservada</option>
+                            <option value="mantenimiento">En Mantenimiento</option>
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const API_URL = './api/mesas.php';
+    const mesasContainer = document.getElementById('mesas-container');
+    const loadingMessage = document.getElementById('loading-message');
+    const modalCrearMesa = new bootstrap.Modal(document.getElementById('modalCrearMesa'));
+    const modalEditarMesa = new bootstrap.Modal(document.getElementById('modalEditarMesa'));
+
+    async function cargarMesas() {
+        loadingMessage.style.display = 'block';
+        try {
+            const response = await fetch(API_URL);
+            const mesas = await response.json();
+            
+            mesasContainer.innerHTML = '';
+            
+            let disponibles = 0, ocupadas = 0, reservadas = 0, mantenimiento = 0;
+
+            mesas.forEach(mesa => {
+                let estadoClass = '';
+                switch (mesa.estado) {
+                    case 'disponible':
+                        estadoClass = 'bg-available';
+                        disponibles++;
+                        break;
+                    case 'ocupada':
+                        estadoClass = 'bg-occupied';
+                        ocupadas++;
+                        break;
+                    case 'reservada':
+                        estadoClass = 'bg-reserved';
+                        reservadas++;
+                        break;
+                    case 'mantenimiento':
+                        estadoClass = 'bg-maintenance';
+                        mantenimiento++;
+                        break;
                 }
-            }
 
-            // NUEVA FUNCIÓN: Obtiene el estado de las mesas y actualiza la UI
-            async function actualizarEstadoMesas() {
-                try {
-                    const response = await fetch('./api/obtener_estado_mesas.php');
-                    if (!response.ok) {
-                        throw new Error('Error al obtener el estado de las mesas.');
-                    }
-                    const mesasOcupadas = await response.json();
-                    
-                    // Recorre todas las tarjetas de mesa
-                    document.querySelectorAll('.table-card').forEach(card => {
-                        const mesaId = parseInt(card.dataset.mesaId);
-                        const icono = card.querySelector('i');
-                        const textoEstado = card.querySelector('.card-text');
+                const mesaCard = document.createElement('div');
+                mesaCard.className = 'card-mesa shadow-sm ' + estadoClass;
+                mesaCard.dataset.id = mesa.id;
+                mesaCard.dataset.nombre = mesa.nombre;
+                mesaCard.dataset.capacidad = mesa.capacidad;
+                mesaCard.dataset.ubicacion = mesa.ubicacion;
+                mesaCard.dataset.estado = mesa.estado;
 
-                        // Si el ID de la mesa está en la lista de mesas ocupadas
-                        if (mesasOcupadas.includes(mesaId)) {
-                            card.classList.remove('bg-light', 'text-dark');
-                            card.classList.add('bg-warning', 'text-white');
-                            icono.classList.remove('text-success');
-                            icono.classList.add('text-dark');
-                            icono.classList.replace('bi-box-seam', 'bi-cart-check-fill');
-                            textoEstado.textContent = 'Ocupada';
-                            textoEstado.classList.remove('text-muted');
-                            textoEstado.classList.add('fw-bold');
-                        } else {
-                            // En caso de que se haya liberado una mesa
-                            card.classList.remove('bg-warning', 'text-white');
-                            card.classList.add('bg-light', 'text-dark');
-                            icono.classList.remove('text-dark');
-                            icono.classList.add('text-success');
-                            icono.classList.replace('bi-cart-check-fill', 'bi-box-seam');
-                            textoEstado.textContent = 'Disponible';
-                            textoEstado.classList.remove('fw-bold');
-                            textoEstado.classList.add('text-muted');
-                        }
-                    });
-
-                } catch (error) {
-                    console.error('Error al actualizar el estado de las mesas:', error);
-                }
-            }
-
-            function renderMesas(numMesas) {
-                mesasGrid.innerHTML = '';
-                for (let i = 1; i <= numMesas; i++) {
-                    const mesaCard = document.createElement('div');
-                    mesaCard.className = 'col';
-                    mesaCard.innerHTML = `
-                        <div class="card h-100 text-center table-card" data-mesa-id="${i}">
-                            <div class="card-body">
-                                <i class="bi bi-box-seam display-4 text-success"></i>
-                                <h5 class="card-title mt-2">Mesa ${i}</h5>
-                                <p class="card-text text-muted">Disponible</p>
-                            </div>
-                        </div>
-                    `;
-                    mesasGrid.appendChild(mesaCard);
-                }
-            }
-
-            mesasGrid.addEventListener('click', (e) => {
-                const card = e.target.closest('.table-card');
-                if (card) {
-                    const mesaId = card.dataset.mesaId;
-                    window.location.href = `pedidos.html?mesa=${encodeURIComponent(mesaId)}`;
-                }
+                mesaCard.innerHTML = `
+                    <span class="fs-4">${mesa.nombre}</span>
+                    <small class="mb-1">${mesa.capacidad} personas</small>
+                    <small class="text-white-50">${mesa.ubicacion}</small>
+                `;
+                mesasContainer.appendChild(mesaCard);
             });
 
-            obtenerMesasDelLocal();
-        });
-    </script>
+            document.getElementById('total-mesas').textContent = mesas.length;
+            document.getElementById('mesas-disponibles').textContent = disponibles;
+            document.getElementById('mesas-ocupadas').textContent = ocupadas;
+            document.getElementById('mesas-reservadas').textContent = reservadas;
+            document.getElementById('mesas-mantenimiento').textContent = mantenimiento;
+
+        } catch (error) {
+            console.error('Error al cargar las mesas:', error);
+            mesasContainer.innerHTML = `<div class="alert alert-danger w-100 text-center">Hubo un error al cargar las mesas.</div>`;
+        } finally {
+            loadingMessage.style.display = 'none';
+        }
+    }
+
+    // Manejar el clic en las mesas para editar
+    mesasContainer.addEventListener('click', (e) => {
+        const mesaCard = e.target.closest('.card-mesa');
+        if (mesaCard) {
+            document.getElementById('edit-mesa-id').value = mesaCard.dataset.id;
+            document.getElementById('edit-mesa-nombre').value = mesaCard.dataset.nombre;
+            document.getElementById('edit-mesa-capacidad').value = mesaCard.dataset.capacidad;
+            document.getElementById('edit-mesa-ubicacion').value = mesaCard.dataset.ubicacion;
+            document.getElementById('edit-mesa-estado').value = mesaCard.dataset.estado;
+
+            modalEditarMesa.show();
+        }
+    });
+
+    // Manejar el envío del formulario de creación de mesa
+    document.getElementById('formCrearMesa').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nuevaMesa = {
+            nombre: document.getElementById('nueva-mesa-nombre').value,
+            capacidad: document.getElementById('nueva-mesa-capacidad').value,
+            ubicacion: document.getElementById('nueva-mesa-ubicacion').value
+        };
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(nuevaMesa)
+            });
+            const resultado = await response.json();
+            if (resultado.success) {
+                modalCrearMesa.hide();
+                document.getElementById('formCrearMesa').reset();
+                cargarMesas();
+            } else {
+                alert('Error al crear la mesa: ' + resultado.message);
+            }
+        } catch (error) {
+            console.error('Error al crear la mesa:', error);
+            alert('Hubo un error al crear la mesa.');
+        }
+    });
+
+    // Manejar el envío del formulario de edición de mesa
+    document.getElementById('formEditarMesa').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const mesaEditada = {
+            id: document.getElementById('edit-mesa-id').value,
+            nombre: document.getElementById('edit-mesa-nombre').value,
+            capacidad: document.getElementById('edit-mesa-capacidad').value,
+            ubicacion: document.getElementById('edit-mesa-ubicacion').value,
+            estado: document.getElementById('edit-mesa-estado').value
+        };
+        try {
+            const response = await fetch(API_URL, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(mesaEditada)
+            });
+            const resultado = await response.json();
+            if (resultado.success) {
+                modalEditarMesa.hide();
+                cargarMesas();
+            } else {
+                alert('Error al actualizar la mesa: ' + resultado.message);
+            }
+        } catch (error) {
+            console.error('Error al actualizar la mesa:', error);
+            alert('Hubo un error al guardar los cambios.');
+        }
+    });
+
+    // Cargar las mesas al iniciar la página
+    cargarMesas();
+</script>
 </body>
 </html>

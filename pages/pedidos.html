@@ -6,6 +6,35 @@
     <title>Pedidos - DMENUNET</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .pedido-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .pedido-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .estado-badge {
+            font-size: 0.8em;
+            font-weight: bold;
+            padding: 0.3em 0.8em;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .bg-preparacion { background-color: #fff3cd; color: #856404; }
+        .bg-servido { background-color: #d4edda; color: #155724; }
+        .bg-entregado { background-color: #cce5ff; color: #004085; }
+        .bg-cancelado { background-color: #f8d7da; color: #721c24; }
+        .list-group-item:hover {
+            background-color: #f1f1f1;
+        }
+        .modal-body-scrollable {
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+    </style>
 </head>
 <body>
 
@@ -49,217 +78,566 @@
     </div>
 </nav>
 
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Pedidos</h1>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoPedido">
+            <i class="bi bi-plus me-1"></i> Nuevo Pedido
+        </button>
+    </div>
 
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-3">
-                <h5 class="mb-3">Categorías</h5>
-                <div class="list-group" id="categorias-list">
-                    </div>
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="input-group">
+                <input type="text" class="form-control" id="searchInput" placeholder="Buscar por ID o cliente...">
+                <button class="btn btn-outline-secondary" type="button" id="searchBtn"><i class="bi bi-search"></i></button>
             </div>
-
-            <div class="col-md-5">
-                <h5 class="mb-3">Productos</h5>
-                <div id="productos-grid" class="row row-cols-1 row-cols-lg-2 g-3">
-                    </div>
-                <p id="productos-loading" class="text-center mt-4 d-none">Cargando productos...</p>
+        </div>
+        <div class="col-md-4">
+            <select class="form-select" id="estadoFilter">
+                <option value="todos">Todos los estados</option>
+                <option value="en_preparacion">En preparación</option>
+                <option value="servido">Servido</option>
+                <option value="entregado">Entregado</option>
+                <option value="cancelado">Cancelado</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4" id="pedidos-container">
+        <div id="loading-message" class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
             </div>
+            <p class="mt-2">Cargando pedidos...</p>
+        </div>
+    </div>
+</div>
 
-            <div class="col-md-4">
-                <h5 class="mb-3">Pedido Actual</h5>
-                <ul class="list-group mb-3" id="pedido-list">
-                    </ul>
-                <div class="card p-3">
-                    <p class="mb-2">**Total:** $<span id="total-pedido">0.00</span></p>
-                    <button id="finalizar-pedido-btn" class="btn btn-success"><i class="bi bi-cart-fill me-2"></i>Finalizar Pedido</button>
-                    <div id="alert-container" class="mt-3"></div>
-                </div>
+<div class="modal fade" id="modalNuevoPedido" tabindex="-1" aria-labelledby="modalNuevoPedidoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalNuevoPedidoLabel">Nuevo Pedido</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formNuevoPedido">
+                    <h6 class="border-bottom pb-2 mb-3">Datos del Pedido</h6>
+                    <div class="mb-3">
+                        <label for="tipoPedido" class="form-label">Tipo de Pedido</label>
+                        <select class="form-select" id="tipoPedido" required>
+                            <option value="en_restaurante" selected>En restaurante (Mesa)</option>
+                            <option value="para_llevar">Para llevar</option>
+                            <option value="domicilio">Domicilio</option>
+                        </select>
+                    </div>
+                    <div id="seccionMesa" class="mb-3">
+                        <label for="mesaSelect" class="form-label">Seleccionar Mesa Disponible</label>
+                        <select class="form-select" id="mesaSelect" required>
+                            </select>
+                    </div>
+                    <div id="seccionCliente" class="mb-3 d-none">
+                        <label for="clienteInput" class="form-label">Nombre del Cliente</label>
+                        <input type="text" class="form-control" id="clienteInput" placeholder="Ej: Juan Pérez">
+                    </div>
+                    
+                    <h6 class="border-bottom pb-2 mt-4 mb-3">Productos</h6>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="buscarProductoInput" placeholder="Buscar producto...">
+                        <button class="btn btn-primary" type="button" id="buscarProductoBtn"><i class="bi bi-search"></i></button>
+                    </div>
+                    <div class="list-group modal-body-scrollable" id="productosResultados">
+                        </div>
+                    <hr>
+                    <div id="productosSeleccionados" class="mb-3">
+                        <p class="text-muted">No hay productos en el pedido.</p>
+                        <ul class="list-group" id="pedido-list"></ul>
+                    </div>
+
+                    <div class="d-flex justify-content-end align-items-center mt-4">
+                        <h4 class="me-3 mb-0">Total: <span id="totalPedido">$0</span></h4>
+                        <button type="submit" class="btn btn-primary btn-lg">Crear Pedido</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const mesaId = new URLSearchParams(window.location.search).get('mesa');
-            if (mesaId) {
-                document.getElementById('mesa-id').textContent = decodeURIComponent(mesaId);
+<div class="modal fade" id="modalEditarPedido" tabindex="-1" aria-labelledby="modalEditarPedidoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarPedidoLabel">Detalles del Pedido <span id="pedidoIdDisplay"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalEditarBody">
+                </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn-danger" id="cancelarOrdenBtn">
+                    <i class="bi bi-trash"></i> Cancelar Orden
+                </button>
+                <button type="button" class="btn btn-success" id="cerrarCuentaBtn">
+                    <i class="bi bi-cash-stack"></i> Cerrar Cuenta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCerrarCuenta" tabindex="-1" aria-labelledby="modalCerrarCuentaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCerrarCuentaLabel">Cerrar Cuenta y Pagar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="ticket-preview">
+                    </div>
+                <div class="mt-4">
+                    <h6>Medio de Pago</h6>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="medioPago" id="pagoEfectivo" value="efectivo" checked>
+                        <label class="form-check-label" for="pagoEfectivo">Efectivo</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="medioPago" id="pagoDebito" value="tarjeta_debito">
+                        <label class="form-check-label" for="pagoDebito">Tarjeta Débito</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="medioPago" id="pagoCredito" value="tarjeta_credito">
+                        <label class="form-check-label" for="pagoCredito">Tarjeta Crédito</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="medioPago" id="pagoBono" value="bono">
+                        <label class="form-check-label" for="pagoBono">Bono</label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="confirmarPagoBtn">Confirmar Pago e Imprimir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const API_PEDIDOS_URL = './api/pedidos/';
+    const API_MESAS_URL = './api/mesas.php';
+    const API_PRODUCTOS_URL = './api/productos.php';
+    
+    const pedidosContainer = document.getElementById('pedidos-container');
+    const modalNuevoPedido = new bootstrap.Modal(document.getElementById('modalNuevoPedido'));
+    const modalEditarPedido = new bootstrap.Modal(document.getElementById('modalEditarPedido'));
+    const modalCerrarCuenta = new bootstrap.Modal(document.getElementById('modalCerrarCuenta'));
+    const formNuevoPedido = document.getElementById('formNuevoPedido');
+    const pedidoListModalNuevo = document.getElementById('pedido-list');
+    const totalPedidoSpan = document.getElementById('totalPedido');
+    let pedidoActual = [];
+    let productosDisponibles = [];
+    let todosLosPedidos = [];
+    let pedidoParaCerrar = null;
+
+    async function cargarPedidos() {
+        pedidosContainer.innerHTML = `<div id="loading-message" class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2">Cargando pedidos...</p>
+        </div>`;
+
+        try {
+            const response = await fetch(`${API_PEDIDOS_URL}obtener.php`);
+            todosLosPedidos = await response.json();
+            mostrarPedidos(todosLosPedidos);
+        } catch (error) {
+            console.error('Error al cargar pedidos:', error);
+            pedidosContainer.innerHTML = `<div class="col-12 text-center text-danger">Error al cargar los pedidos.</div>`;
+        }
+    }
+
+    function mostrarPedidos(pedidos) {
+        pedidosContainer.innerHTML = '';
+        if (pedidos.length === 0) {
+            pedidosContainer.innerHTML = `<div class="col-12 text-center text-muted">No hay pedidos activos.</div>`;
+            return;
+        }
+        
+        pedidos.forEach(pedido => {
+            const card = document.createElement('div');
+            card.className = 'col';
+            let estadoClass = '';
+            switch(pedido.estado) {
+                case 'en_preparacion': estadoClass = 'bg-preparacion'; break;
+                case 'servido': estadoClass = 'bg-servido'; break;
+                case 'entregado': estadoClass = 'bg-entregado'; break;
+                case 'cancelado': estadoClass = 'bg-cancelado'; break;
+                default: estadoClass = 'bg-light';
             }
 
-            const categoriasList = document.getElementById('categorias-list');
-            const productosGrid = document.getElementById('productos-grid');
-            const productosLoading = document.getElementById('productos-loading');
-            const pedidoList = document.getElementById('pedido-list');
-            const totalElement = document.getElementById('total-pedido');
-            const finalizarPedidoBtn = document.getElementById('finalizar-pedido-btn');
-            const alertContainer = document.getElementById('alert-container');
-            let total = 0;
+            const tipo = pedido.mesa_id ? 'En restaurante' : 'Para llevar / Domicilio';
 
-            const showAlert = (message, type) => {
-                alertContainer.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                                                ${message}
-                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                            </div>`;
-            };
-
-            async function cargarCategorias() {
-                try {
-                    const response = await fetch('./api/obtener_categorias.php');
-                    if (!response.ok) throw new Error('Error al cargar categorías');
-                    const categorias = await response.json();
-
-                    categoriasList.innerHTML = '';
-                    categorias.forEach(categoria => {
-                        const btn = document.createElement('button');
-                        btn.className = 'list-group-item list-group-item-action';
-                        btn.textContent = categoria.nombre;
-                        btn.dataset.categoriaId = categoria.id;
-                        btn.addEventListener('click', () => {
-                            cargarProductos(categoria.id);
-                        });
-                        categoriasList.appendChild(btn);
-                    });
-
-                    if (categorias.length > 0) {
-                        cargarProductos(categorias[0].id);
-                        categoriasList.querySelector('button').classList.add('active');
-                    }
-                    
-                } catch (error) {
-                    console.error('Error:', error);
-                    categoriasList.innerHTML = '<p class="text-danger">No se pudieron cargar las categorías.</p>';
-                }
-            }
-
-            async function cargarProductos(categoriaId) {
-                productosGrid.innerHTML = '';
-                productosLoading.classList.remove('d-none');
-
-                document.querySelectorAll('.list-group-item').forEach(btn => btn.classList.remove('active'));
-                document.querySelector(`[data-categoria-id='${categoriaId}']`).classList.add('active');
-
-                try {
-                    const response = await fetch(`./api/obtener_insumos.php?categoria_id=${categoriaId}`);
-                    if (!response.ok) throw new Error('Error al cargar productos');
-                    const productos = await response.json();
-
-                    productosGrid.innerHTML = '';
-                    if (productos.length === 0) {
-                        productosGrid.innerHTML = '<div class="col-12"><p class="text-muted">No hay productos en esta categoría.</p></div>';
-                        return;
-                    }
-
-                    productos.forEach(producto => {
-                        const productoCard = document.createElement('div');
-                        productoCard.className = 'col';
-                        productoCard.innerHTML = `
-                            <div class="card h-100 product-card" data-producto-id="${producto.id}" data-precio="${producto.precio}">
-                                <div class="card-body">
-                                    <h6 class="card-title">${producto.nombre}</h6>
-                                    <p class="card-text text-muted">${producto.descripcion}</p>
-                                    <p class="card-text">**$${parseFloat(producto.precio).toFixed(2)}**</p>
-                                    <button class="btn btn-sm btn-primary add-to-order-btn"><i class="bi bi-plus-circle"></i> Agregar</button>
-                                </div>
+            card.innerHTML = `
+                <div class="card pedido-card h-100 shadow-sm" data-id="${pedido.id}">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">ORD-${pedido.id.padStart(3, '0')}</h5>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary ver-btn me-1" data-id="${pedido.id}"><i class="bi bi-eye"></i></button>
+                                <button class="btn btn-sm btn-outline-primary editar-btn" data-id="${pedido.id}"><i class="bi bi-pencil"></i></button>
                             </div>
-                        `;
-                        productosGrid.appendChild(productoCard);
-                    });
-
-                } catch (error) {
-                    console.error('Error:', error);
-                    productosGrid.innerHTML = '<div class="col-12"><p class="text-danger">Hubo un problema al cargar los productos.</p></div>';
-                } finally {
-                    productosLoading.classList.add('d-none');
-                }
-            }
-
-            // Lógica para agregar productos al pedido
-            productosGrid.addEventListener('click', (e) => {
-                const addButton = e.target.closest('.add-to-order-btn');
-                if (!addButton) return;
-
-                const card = addButton.closest('.product-card');
-                const nombre = card.querySelector('.card-title').textContent;
-                const precio = parseFloat(card.dataset.precio);
-                const id = card.dataset.productoId;
-
-                const itemExistente = Array.from(pedidoList.children).find(item => item.dataset.id === id);
-
-                if (itemExistente) {
-                    const cantidadSpan = itemExistente.querySelector('.item-cantidad');
-                    let cantidad = parseInt(cantidadSpan.textContent) + 1;
-                    cantidadSpan.textContent = cantidad;
-                    itemExistente.dataset.cantidad = cantidad;
-                    itemExistente.querySelector('.item-total').textContent = (precio * cantidad).toFixed(2);
-                } else {
-                    const listItem = document.createElement('li');
-                    listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
-                    listItem.dataset.id = id;
-                    listItem.dataset.precio = precio;
-                    listItem.dataset.cantidad = 1;
-                    listItem.innerHTML = `
-                        <div>
-                            ${nombre}
-                            <span class="badge bg-primary rounded-pill ms-2 item-cantidad">1</span>
                         </div>
-                        <span class="fw-bold">$<span class="item-total">${precio.toFixed(2)}</span></span>
-                    `;
-                    pedidoList.appendChild(listItem);
-                }
-
-                total += precio;
-                totalElement.textContent = total.toFixed(2);
-            });
-            
-            finalizarPedidoBtn.addEventListener('click', async () => {
-                if (total <= 0) {
-                    showAlert('El pedido está vacío. Agrega productos para finalizar.', 'warning');
-                    return;
-                }
-
-                const pedido = [];
-                Array.from(pedidoList.children).forEach(item => {
-                    pedido.push({
-                        id: parseInt(item.dataset.id),
-                        cantidad: parseInt(item.dataset.cantidad),
-                        precio: parseFloat(item.dataset.precio)
-                    });
-                });
-
-                const datosParaEnviar = {
-                    mesa_id: mesaId,
-                    pedido: pedido
-                };
-
-                try {
-                    const response = await fetch('./api/registrar_venta.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(datosParaEnviar)
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok && result.success) {
-                        showAlert('¡Pedido finalizado y registrado con éxito!', 'success');
-                        // Opcional: Redirigir al usuario de vuelta a la página de mesas  
-                        setTimeout(() => {
-                            window.location.href = 'mesas.html';
-                        }, 2000); 
-                    } else {
-                        throw new Error(result.error || 'Error desconocido al registrar el pedido');
-                    }
-                } catch (error) {
-                    showAlert(`Hubo un problema: ${error.message}`, 'danger');
-                    console.error('Error al finalizar el pedido:', error);
-                }
-            });
-
-            // Iniciar la carga de categorías
-            cargarCategorias();
+                        <p class="card-text mb-1">Mesa ${pedido.mesa_nombre || 'N/A'} • ${tipo}</p>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-person me-2"></i>
+                            <small>${pedido.cliente_nombre || 'N/A'}</small>
+                        </div>
+                        <h4 class="text-primary mb-2">$${parseFloat(pedido.total).toFixed(2)}</h4>
+                        <span class="estado-badge ${estadoClass} mt-auto">${pedido.estado.replace(/_/g, ' ').toUpperCase()}</span>
+                    </div>
+                </div>
+            `;
+            pedidosContainer.appendChild(card);
         });
-    </script>
+    }
+
+    // Funcionalidad de filtrado y búsqueda
+    document.getElementById('estadoFilter').addEventListener('change', filtrarPedidos);
+    document.getElementById('searchInput').addEventListener('input', filtrarPedidos);
+    document.getElementById('searchBtn').addEventListener('click', filtrarPedidos);
+
+    function filtrarPedidos() {
+        const estadoSeleccionado = document.getElementById('estadoFilter').value;
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+        const pedidosFiltrados = todosLosPedidos.filter(pedido => {
+            const matchEstado = estadoSeleccionado === 'todos' || pedido.estado === estadoSeleccionado;
+            const matchSearch = pedido.id.toString().includes(searchTerm) || (pedido.cliente_nombre && pedido.cliente_nombre.toLowerCase().includes(searchTerm));
+            return matchEstado && matchSearch;
+        });
+
+        mostrarPedidos(pedidosFiltrados);
+    }
+
+    // Funcionalidad para el modal de "Nuevo Pedido"
+    document.getElementById('tipoPedido').addEventListener('change', (e) => {
+        const tipo = e.target.value;
+        document.getElementById('seccionMesa').classList.toggle('d-none', tipo !== 'en_restaurante');
+        document.getElementById('seccionCliente').classList.toggle('d-none', tipo === 'en_restaurante');
+    });
+
+    async function cargarMesasDisponibles() {
+        try {
+            const response = await fetch(`${API_MESAS_URL}?estado=disponible`);
+            const mesas = await response.json();
+            const select = document.getElementById('mesaSelect');
+            select.innerHTML = '<option value="" disabled selected>Selecciona una mesa</option>';
+            if (mesas.length > 0) {
+                mesas.forEach(mesa => {
+                    const option = document.createElement('option');
+                    option.value = mesa.id;
+                    option.textContent = `Mesa ${mesa.nombre} (${mesa.capacidad} personas)`;
+                    select.appendChild(option);
+                });
+            } else {
+                select.innerHTML = '<option value="" disabled selected>No hay mesas disponibles</option>';
+            }
+        } catch (error) {
+            console.error('Error al cargar mesas disponibles:', error);
+        }
+    }
+
+    async function cargarProductos() {
+        try {
+            const response = await fetch(API_PRODUCTOS_URL);
+            productosDisponibles = await response.json();
+        } catch (error) {
+            console.error('Error al cargar productos:', error);
+        }
+    }
+
+    // Buscar productos
+    document.getElementById('buscarProductoBtn').addEventListener('click', () => {
+        const query = document.getElementById('buscarProductoInput').value.toLowerCase();
+        const resultadosDiv = document.getElementById('productosResultados');
+        resultadosDiv.innerHTML = '';
+        const resultados = productosDisponibles.filter(p => p.nombre.toLowerCase().includes(query) || p.codigo.toLowerCase().includes(query));
+
+        if (resultados.length > 0) {
+            resultados.forEach(producto => {
+                const item = document.createElement('a');
+                item.href = '#';
+                item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                item.innerHTML = `
+                    <div>${producto.nombre} <small class="text-muted">($${parseFloat(producto.precio).toFixed(2)})</small></div>
+                    <button type="button" class="btn btn-sm btn-outline-primary agregar-producto-btn" data-id="${producto.id}" data-nombre="${producto.nombre}" data-precio="${producto.precio}">
+                        Agregar
+                    </button>
+                `;
+                resultadosDiv.appendChild(item);
+            });
+        } else {
+            resultadosDiv.innerHTML = `<p class="text-muted p-2">No se encontraron productos.</p>`;
+        }
+    });
+
+    // Agregar producto al pedido en el modal de nuevo pedido
+    document.getElementById('productosResultados').addEventListener('click', (e) => {
+        const addButton = e.target.closest('.agregar-producto-btn');
+        if (!addButton) return;
+
+        const id = addButton.dataset.id;
+        const nombre = addButton.dataset.nombre;
+        const precio = parseFloat(addButton.dataset.precio);
+
+        const itemExistente = pedidoActual.find(item => item.id == id);
+        if (itemExistente) {
+            itemExistente.cantidad++;
+        } else {
+            pedidoActual.push({ id, nombre, precio, cantidad: 1 });
+        }
+
+        actualizarPedidoEnModalNuevo();
+    });
+
+    function actualizarPedidoEnModalNuevo() {
+        pedidoListModalNuevo.innerHTML = '';
+        let total = 0;
+        if (pedidoActual.length === 0) {
+            document.getElementById('productosSeleccionados').querySelector('p').classList.remove('d-none');
+            pedidoListModalNuevo.classList.add('d-none');
+        } else {
+            document.getElementById('productosSeleccionados').querySelector('p').classList.add('d-none');
+            pedidoListModalNuevo.classList.remove('d-none');
+        }
+
+        pedidoActual.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.innerHTML = `
+                <div>${item.nombre} x <span class="fw-bold">${item.cantidad}</span></div>
+                <div>
+                    <span class="me-3">$${(item.precio * item.cantidad).toFixed(2)}</span>
+                    <button type="button" class="btn btn-sm btn-outline-danger eliminar-producto-btn" data-id="${item.id}">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            `;
+            pedidoListModalNuevo.appendChild(li);
+            total += item.precio * item.cantidad;
+        });
+        totalPedidoSpan.textContent = `$${total.toFixed(2)}`;
+    }
+
+    // Eliminar producto del pedido en el modal de nuevo pedido
+    pedidoListModalNuevo.addEventListener('click', (e) => {
+        const deleteButton = e.target.closest('.eliminar-producto-btn');
+        if (!deleteButton) return;
+
+        const id = deleteButton.dataset.id;
+        const itemExistente = pedidoActual.find(item => item.id == id);
+        if (itemExistente.cantidad > 1) {
+            itemExistente.cantidad--;
+        } else {
+            pedidoActual = pedidoActual.filter(item => item.id != id);
+        }
+        actualizarPedidoEnModalNuevo();
+    });
+
+    // Crear nuevo pedido
+    formNuevoPedido.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (pedidoActual.length === 0) {
+            alert('El pedido está vacío. Por favor, agrega productos.');
+            return;
+        }
+
+        const tipoPedido = document.getElementById('tipoPedido').value;
+        let datos = {
+            tipo: tipoPedido,
+            productos: pedidoActual,
+            total: parseFloat(totalPedidoSpan.textContent.replace('$', ''))
+        };
+
+        if (tipoPedido === 'en_restaurante') {
+            const mesaSelect = document.getElementById('mesaSelect');
+            const mesaId = mesaSelect.value;
+            if (!mesaId) {
+                alert('Por favor, selecciona una mesa.');
+                return;
+            }
+            datos.mesa_id = mesaId;
+        } else {
+            datos.cliente = document.getElementById('clienteInput').value;
+        }
+
+        try {
+            const response = await fetch(`${API_PEDIDOS_URL}crear.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert('Pedido creado con éxito!');
+                modalNuevoPedido.hide();
+                pedidoActual = [];
+                formNuevoPedido.reset();
+                actualizarPedidoEnModalNuevo();
+                cargarPedidos();
+            } else {
+                alert(`Error: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error al crear pedido:', error);
+            alert('Hubo un problema al crear el pedido.');
+        }
+    });
+
+    // Manejar el evento de los botones "Ver" y "Editar"
+    pedidosContainer.addEventListener('click', async (e) => {
+        const button = e.target.closest('.ver-btn') || e.target.closest('.editar-btn');
+        if (!button) return;
+
+        const pedidoId = button.dataset.id;
+        pedidoParaCerrar = pedidoId;
+        
+        try {
+            const response = await fetch(`${API_PEDIDOS_URL}obtener.php?id=${pedidoId}`);
+            const pedido = await response.json();
+            
+            if (pedido.error) {
+                alert(`Error: ${pedido.error}`);
+                return;
+            }
+            
+            const modalBody = document.getElementById('modalEditarBody');
+            document.getElementById('pedidoIdDisplay').textContent = `(ID: ${pedido.id.padStart(3, '0')})`;
+            
+            let productosHtml = '';
+            pedido.productos.forEach(item => {
+                productosHtml += `
+                    <li class="list-group-item">
+                        ${item.nombre} - Cantidad: ${item.cantidad} - Precio: $${parseFloat(item.precio).toFixed(2)}
+                    </li>
+                `;
+            });
+
+            modalBody.innerHTML = `
+                <h6>Detalles del Pedido</h6>
+                <p><strong>Mesa:</strong> ${pedido.mesa_nombre || 'N/A'}</p>
+                <p><strong>Estado:</strong> ${pedido.estado.replace(/_/g, ' ').toUpperCase()}</p>
+                <p><strong>Fecha:</strong> ${new Date(pedido.fecha_creacion).toLocaleString()}</p>
+                <h6>Productos del Pedido</h6>
+                <ul class="list-group">${productosHtml}</ul>
+                <h5 class="mt-3">Total: $${parseFloat(pedido.total).toFixed(2)}</h5>
+            `;
+            modalEditarPedido.show();
+        } catch (error) {
+            console.error('Error al cargar detalles del pedido:', error);
+            alert('Hubo un problema al cargar los detalles del pedido.');
+        }
+    });
+
+    // Botón para cerrar la cuenta (del modal de editar pedido)
+    document.getElementById('cerrarCuentaBtn').addEventListener('click', () => {
+        modalEditarPedido.hide();
+        modalCerrarCuenta.show();
+        generarTicket();
+    });
+
+    async function generarTicket() {
+        if (!pedidoParaCerrar) return;
+
+        try {
+            const response = await fetch(`${API_PEDIDOS_URL}obtener.php?id=${pedidoParaCerrar}`);
+            const pedido = await response.json();
+            const ticketPreview = document.getElementById('ticket-preview');
+            
+            let productosTicket = '';
+            let total = 0;
+            pedido.productos.forEach(item => {
+                const subtotal = item.precio * item.cantidad;
+                productosTicket += `<p>${item.nombre} x${item.cantidad} - $${subtotal.toFixed(2)}</p>`;
+                total += subtotal;
+            });
+
+            ticketPreview.innerHTML = `
+                <div style="font-family: monospace; font-size: 12px;">
+                    <h5 style="text-align: center;">DMENUNET RESTAURANT</h5>
+                    <p style="text-align: center;">--- Ticket de Venta ---</p>
+                    <p>Pedido #${pedido.id}</p>
+                    <p>Mesa: ${pedido.mesa_nombre || 'N/A'}</p>
+                    <p>Fecha: ${new Date().toLocaleString()}</p>
+                    <p>-------------------------</p>
+                    ${productosTicket}
+                    <p>-------------------------</p>
+                    <p>Total: $${total.toFixed(2)}</p>
+                    <p style="text-align: center;">¡Gracias por su visita!</p>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error al generar el ticket:', error);
+            alert('No se pudo generar el ticket.');
+        }
+    }
+
+    document.getElementById('confirmarPagoBtn').addEventListener('click', async () => {
+        const medioPago = document.querySelector('input[name="medioPago"]:checked').value;
+        try {
+            const response = await fetch(`${API_PEDIDOS_URL}cerrar.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: pedidoParaCerrar, medio_pago: medioPago })
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert('Cuenta cerrada y venta registrada. El ticket se ha enviado a la impresora.');
+                modalCerrarCuenta.hide();
+                cargarPedidos();
+            } else {
+                alert(`Error: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error al cerrar la cuenta:', error);
+            alert('Hubo un problema al procesar el pago.');
+        }
+    });
+
+    document.getElementById('cancelarOrdenBtn').addEventListener('click', async () => {
+        if (confirm('¿Estás seguro de que quieres cancelar esta orden? Esta acción no se puede deshacer.')) {
+            try {
+                const response = await fetch(`${API_PEDIDOS_URL}cancelar.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: pedidoParaCerrar })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert('Orden cancelada con éxito.');
+                    modalEditarPedido.hide();
+                    cargarPedidos();
+                } else {
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Error al cancelar la orden:', error);
+                alert('Hubo un problema al cancelar la orden.');
+            }
+        }
+    });
+
+    // Inicializar la página
+    document.addEventListener('DOMContentLoaded', () => {
+        cargarPedidos();
+        cargarMesasDisponibles();
+        cargarProductos();
+    });
+</script>
 </body>
 </html>
