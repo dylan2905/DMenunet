@@ -397,7 +397,6 @@
                 const result = await response.json();
                 if (response.ok && result.success) {
                     showAlert('¡Usuario creado correctamente!', 'success');
-                    // Opcional: Cerrar el modal o resetear el formulario
                     const modal = bootstrap.Modal.getInstance(document.getElementById('crearUsuarioModal'));
                     modal.hide();
                     formCrearUsuario.reset();

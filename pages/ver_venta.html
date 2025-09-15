@@ -151,7 +151,7 @@
             const finalizarBtn = document.getElementById('finalizar-btn');
             const imprimirBtn = document.getElementById('imprimir-btn');
             const anularBtn = document.getElementById('anular-btn');
-            const moverBtn = document.getElementById('mover-btn'); // Nuevo botón
+            const moverBtn = document.getElementById('mover-btn'); 
 
             if (!ventaId) {
                 errorMessage.textContent = 'ID de venta no proporcionado.';
@@ -290,7 +290,7 @@
             });
             
             // =========================================================================
-            // Lógica para mover la venta de mesa (NUEVA)
+            // Lógica para mover la venta de mesa 
             // =========================================================================
             moverBtn.addEventListener('click', async () => {
                 if (ventaGlobal) {
