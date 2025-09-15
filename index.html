@@ -1,816 +1,109 @@
+<?php include_once "verificar_sesion.php"; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestión de Restaurante</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="estilos/styles.css">
-
+    <title>DMENUNET - Inicio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { border-radius: 1rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .hero-section {
+            background-color: #007bff;
+            color: white;
+            padding: 5rem 0;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1><i class="fas fa-utensils"></i> PRORESTAURANT</h1>
-            <p>Sistema Integral de Gestión de Restaurante</p>
-        </div>
 
-        <div class="dashboard-grid">
-                        <!-- Gestión de Restaurante -->
-            <div class="module-card restaurantes" onclick="openModal('restaurantes')">
-                <div class="module-header">
-                    <div class="module-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="module-title">Gestión de Restaurantes</div>
-                </div>
-                <div class="module-description">
-                    Administra datos del restaurante, sucursales y horarios.
-                </div>
-                <ul class="module-functions">
-                    <li>Cambiar nombre</li>
-                    <li>Editar información de restaurante</li>
-                    <li>Crear database</li>
+  
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index_prueba.html"><i class="bi bi-house me-2"></i>DMENUNET</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/dashboard.html"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/inventario.html"><i class="bi bi-boxes"></i> Inventario</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/crear_producto.html"><i class="bi bi-plus-circle"></i> Crear Producto</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/mesas.html"><i class="bi bi-shop"></i> Mesas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/pedidos.html"><i class="bi bi-receipt"></i> Pedidos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/historial_ventas.html"><i class="bi bi-clock-history"></i> Historial de Ventas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="pages/ajustes.html"><i class="bi bi-gear"></i> Ajustes</a>
+                    </li>
                 </ul>
-            </div>
-            <!-- Gestión de Usuarios -->
-            <div class="module-card usuarios" onclick="openModal('usuarios')">
-                <div class="module-header">
-                    <div class="module-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="module-title">Gestión de Usuarios</div>
-                </div>
-                <div class="module-description">
-                    Administra usuarios, perfiles y permisos del sistema
-                </div>
-                <ul class="module-functions">
-                    <li>Registrar nuevos usuarios</li>
-                    <li>Editar información de usuarios</li>
-                    <li>Eliminar usuarios</li>
-                    <li>Cambio de contraseñas</li>
-                </ul>
-            </div>
-
-            <!-- Gestión de Categorías -->
-            <div class="module-card categorias" onclick="openModal('categorias')">
-                <div class="module-header">
-                    <div class="module-icon">
-                        <i class="fas fa-tags"></i>
-                    </div>
-                    <div class="module-title">Categorías</div>
-                </div>
-                <div class="module-description">
-                    Organiza y clasifica productos por categorías
-                </div>
-                <ul class="module-functions">
-                    <li>Crear categorías</li>
-                    <li>Editar categorías</li>
-                    <li>Eliminar categorías</li>
-                    <li>Obtener tipos de categoría</li>
-                </ul>
-            </div>
-
-            <!-- Gestión de Insumos -->
-            <div class="module-card insumos" onclick="openModal('insumos')">
-                <div class="module-header">
-                    <div class="module-icon">
-                        <i class="fas fa-boxes"></i>
-                    </div>
-                    <div class="module-title">Inventario</div>
-                </div>
-                <div class="module-description">
-                    Control completo del inventario y stock
-                </div>
-                <ul class="module-functions">
-                    <li>Registrar insumos</li>
-                    <li>Editar inventario</li>
-                    <li>Control de stock</li>
-                    <li>Obtener datos por ID/nombre</li>
-                </ul>
-            </div>
-
-            <!-- Gestión de Mesas -->
-            <div class="module-card mesas" onclick="openModal('mesas')">
-                <div class="module-header">
-                    <div class="module-icon">
-                        <i class="fas fa-chair"></i>
-                    </div>
-                    <div class="module-title">Gestión de Mesas</div>
-                </div>
-                <div class="module-description">
-                    Administra mesas y control de ocupación
-                </div>
-                <ul class="module-functions">
-                    <li>Editar información de mesas</li>
-                    <li>Cancelar reservas</li>
-                    <li>Ocupar mesas</li>
-                    <li>Obtener estado de mesas</li>
-                </ul>
-            </div>
-
-            <!-- Sistema de Ventas -->
-            <div class="module-card ventas" onclick="openModal('ventas')">
-                <div class="module-header">
-                    <div class="module-icon">
-                        <i class="fas fa-cash-register"></i>
-                    </div>
-                    <div class="module-title">Punto de Venta</div>
-                </div>
-                <div class="module-description">
-                    Procesa órdenes y gestiona ventas
-                </div>
-                <ul class="module-functions">
-                    <li>Registrar ventas</li>
-                    <li>Obtener datos de ventas</li>
-                    <li>Registrar datos locales</li>
-                    <li>Control de transacciones</li>
-                </ul>
-            </div>
-
-            <!-- Reportes y Análisis -->
-            <div class="module-card reportes" onclick="openModal('reportes')">
-                <div class="module-header">
-                    <div class="module-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="module-title">Reportes</div>
-                </div>
-                <div class="module-description">
-                    Análisis y reportes del negocio
-                </div>
-                <ul class="module-functions">
-                    <li>Obtener datos locales</li>
-                    <li>Perfiles de usuario</li>
-                    <li>Análisis de ventas</li>
-                    <li>Reportes personalizados</li>
-                </ul>
-            </div>
-
-            <!-- Seguridad -->
-            <div class="module-card seguridad" onclick="openModal('seguridad')">
-                <div class="module-header">
-                    <div class="module-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <div class="module-title">Seguridad</div>
-                </div>
-                <div class="module-description">
-                    Control de acceso y seguridad
-                </div>
-                <ul class="module-functions">
-                    <li>Iniciar sesión</li>
-                    <li>Verificar contraseñas</li>
-                    <li>Encriptado de datos</li>
-                    <li>Verificar tablas</li>
-                </ul>
+                <a href="/Dmenunet/api/logout.php" class="btn btn-outline-light">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </a>
             </div>
         </div>
-
-        <div class="quick-actions">
-            <h3>Acciones Rápidas</h3>
-            <div class="action-buttons">
-                <button class="action-btn" onclick="quickAction('newOrder')">
-                    <i class="fas fa-plus"></i> Nueva Orden
-                </button>
-                <button class="action-btn" onclick="quickAction('viewTables')">
-                    <i class="fas fa-eye"></i> Ver Mesas
-                </button>
-                <button class="action-btn" onclick="quickAction('inventory')">
-                    <i class="fas fa-warehouse"></i> Inventario
-                </button>
-                <button class="action-btn" onclick="quickAction('reports')">
-                    <i class="fas fa-chart-bar"></i> Reportes
-                </button>
-                <button class="action-btn" onclick="quickAction('settings')">
-                    <i class="fas fa-tools"></i> Configuración
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal -->
-    <div id="moduleModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="modalTitle"></h2>
-            <div id="modalContent"></div>
-        </div>
-    </div>
-
-    <script>
-        // Configuración de módulos y sus funciones PHP correspondientes
-        const moduleConfig = {
-             restaurantes: {
-        title: 'Gestión de Restaurantes',
-        icon: 'fas fa-users',
-        functions: [
-            { file: 'crear_tablas.php', name: 'Crear DataBase', desc: 'Crear tablas del local' },
-            { file: 'registrar_datos_local.php', name: 'Registrar datos', desc: 'Crear local en la base de datos' },
-            { file: 'actualizar_datos_local.php', name: 'Actualizar Datos', desc: 'Editar información del restaurante' }
-            
-        ]
-            },
-            usuarios: {
-                title: 'Gestión de Usuarios',
-                icon: 'fas fa-users',
-                functions: [
-                    { file: 'registrar_usuario.php', name: 'Registrar Usuario', desc: 'Crear nuevos usuarios en el sistema' },
-                    { file: 'editar_usuario.php', name: 'Editar Usuario', desc: 'Modificar información de usuarios existentes' },
-                    { file: 'eliminar_usuario.php', name: 'Eliminar Usuario', desc: 'Eliminar usuarios del sistema' },
-                    { file: 'obtener_usuario_id.php', name: 'Obtener Usuario por ID', desc: 'Buscar usuario específico por ID' },
-                    { file: 'obtener_usuarios.php', name: 'Listar Usuarios', desc: 'Obtener lista completa de usuarios' },
-                    { file: 'cambiar_password.php', name: 'Cambiar Contraseña', desc: 'Actualizar contraseñas de usuarios' }
-                ]
-            },
-            categorias: {
-                title: 'Gestión de Categorías',
-                icon: 'fas fa-tags',
-                functions: [
-                    { file: 'registrar_categoria.php', name: 'Registrar Categoría', desc: 'Crear nuevas categorías de productos' },
-                    { file: 'actualizar_categorias.php', name: 'Editar Categoría', desc: 'Modificar categorías existentes' },
-                    { file: 'eliminar_categoria.php', name: 'Eliminar Categoría', desc: 'Eliminar categorías del sistema' },
-                    { file: 'obtener_categorias.php', name: 'Listar Categorías', desc: 'Obtener todas las categorías' },
-                    { file: 'obtener_categorias_tipo.php', name: 'Categorías por Tipo', desc: 'Filtrar categorías por tipo específico' }
-                ]
-            },
-            insumos: {
-                title: 'Gestión de Inventario',
-                icon: 'fas fa-boxes',
-                functions: [
-                    { file: 'registrar_insumo.php', name: 'Registrar Insumo', desc: 'Agregar nuevos productos al inventario' },
-                    { file: 'editar_insumo.php', name: 'Editar Insumo', desc: 'Actualizar información de productos' },
-                    { file: 'eliminar_insumo.php', name: 'Eliminar Insumo', desc: 'Eliminar productos del inventario' },
-                    { file: 'obtener_insumo_id.php', name: 'Buscar por ID', desc: 'Encontrar producto específico por ID' },
-                    { file: 'obtener_insumo_nombre.php', name: 'Buscar por Nombre', desc: 'Encontrar producto por nombre' },
-                    { file: 'obtener_insumos.php', name: 'Listar Insumos', desc: 'Ver todo el inventario disponible' }
-                ]
-            },
-            mesas: {
-                title: 'Gestión de Mesas',
-                icon: 'fas fa-chair',
-                functions: [
-                    { file: 'editar_mesa.php', name: 'Editar Mesa', desc: 'Modificar configuración de mesas' },
-                    { file: 'cancelar_mesa.php', name: 'Cancelar Reserva', desc: 'Cancelar reservaciones de mesa' },
-                    { file: 'ocupar_mesa.php', name: 'Ocupar Mesa', desc: 'Marcar mesa como ocupada' },
-                    { file: 'obtener_mesas.php', name: 'Estado de Mesas', desc: 'Ver estado actual de todas las mesas' }
-                ]
-            },
-            ventas: {
-                title: 'Sistema de Ventas',
-                icon: 'fas fa-cash-register',
-                functions: [
-                    { file: 'registrar_venta.php', name: 'Registrar Venta', desc: 'Procesar nueva venta/orden' },
-                    { file: 'obtener_ventas.php', name: 'Consultar Ventas', desc: 'Ver historial de ventas' },
-                    { file: 'registrar_datos_local.php', name: 'Datos Locales', desc: 'Registrar información local del negocio' }
-                ]
-            },
-            reportes: {
-                title: 'Reportes y Análisis',
-                icon: 'fas fa-chart-line',
-                functions: [
-                    { file: 'obtener_datos_local.php', name: 'Datos del Local', desc: 'Información general del restaurante' },
-                    { file: 'perfil.php', name: 'Perfiles', desc: 'Gestión de perfiles de usuario' }
-                ]
-            },
-            seguridad: {
-                title: 'Seguridad y Autenticación',
-                icon: 'fas fa-shield-alt',
-                functions: [
-                    { file: 'iniciar_sesion.php', name: 'Iniciar Sesión', desc: 'Autenticación de usuarios' },
-                    { file: 'verificar_password.php', name: 'Verificar Contraseña', desc: 'Validación de credenciales' },
-                    { file: 'encabezado.php', name: 'Encabezado Seguro', desc: 'Headers de seguridad HTTP' },
-                    { file: 'verificar_tablas.php', name: 'Verificar Tablas', desc: 'Validar integridad de base de datos' }
-                ]
-            }
-        };
-
-        function openModal(moduleKey) {
-            const modal = document.getElementById('moduleModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent');
-            const config = moduleConfig[moduleKey];
-
-            modalTitle.innerHTML = `<i class="${config.icon}"></i> ${config.title}`;
-            
-            let content = '<div class="function-list">';
-            config.functions.forEach(func => {
-                content += `
-                    <div class="function-item" onclick="executeFunction('${func.file}')">
-                        <h4>${func.name}</h4>
-                        <p>${func.desc}</p>
-                        <small style="color: #999;">Archivo: ${func.file}</small>
-                    </div>
-                `;
-            });
-            content += '</div>';
-
-            modalContent.innerHTML = content;
-            modal.style.display = 'block';
-        }
-
-        function executeFunction(phpFile) {
-            // Cerrar el modal actual
-            document.getElementById('moduleModal').style.display = 'none';
-            
-            // Abrir formulario específico según la función
-            if (phpFile.includes('editar_mesa')) {
-                openForm('editarMesa');
-            } else if (phpFile.includes('registrar_usuario')) {
-                openForm('registrarUsuario');
-            } else if (phpFile.includes('registrar_categoria')) {
-                openForm('registrarCategoria');
-            } else if (phpFile.includes('registrar_insumo')) {
-                openForm('registrarInsumo');
-            } else if (phpFile.includes('obtener_')) {
-                openDataView(phpFile);
-            } else if (phpFile.includes('registrar_datos_local')) {
-                openForm('registrarLocal');
-            } else if (phpFile.includes('actualizar_datos_local')) {
-                openForm('ActualizarDatosLocal');
-            } else if (phpFile.includes('actualizar_categorias')) {
-                openForm('ActualizarCategoria');
-            } else {
-                // Para otras funciones, ejecutar directamente
-                executePhpFunction(phpFile);
-            }
-        }
-
-        function openForm(formType) {
-            const modal = document.getElementById('moduleModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent');
-            
-            const forms = {
-                editarMesa: {
-                    title: '<i class="fas fa-edit"></i> Editar Mesa',
-                    content: `
-                        <form id="editarMesaForm" onsubmit="submitForm(event, 'editar_mesa.php')">
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Número de Mesa:</label>
-                                <input type="number" name="numero_mesa" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Capacidad:</label>
-                                <input type="number" name="capacidad" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Estado:</label>
-                                <select name="estado" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                                    <option value="libre">Libre</option>
-                                    <option value="ocupada">Ocupada</option>
-                                    <option value="reservada">Reservada</option>
-                                    <option value="mantenimiento">Mantenimiento</option>
-                                </select>
-                            </div>
-                            <div style="display: flex; gap: 10px;">
-                                <button type="submit" style="flex: 1; padding: 12px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                    <i class="fas fa-save"></i> Guardar Cambios
-                                </button>
-                                <button type="button" onclick="closeModal()" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                    <i class="fas fa-times"></i> Cancelar
-                                </button>
-                            </div>
-                        </form>
-                    `
-                },
-                registrarLocal:{
-                    title: '<i class="fas fa-user-plus"></i> Registrar Local',
-                    content: `
-                       <form id="registrarLocalForm" onsubmit="submitFormFile(event, 'registrar_datos_local.php')">
-                            <div style="margin-bottom: 15px;">
-                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Nombre:</label>
-                                <input type="text" name="nombre" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                            </div>
-
-                            <div style="margin-bottom: 15px;">
-                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Teléfono:</label>
-                                <input type="tel" name="telefono" " placeholder="Ej: 3001234567"
-                                    style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                            </div>
-
-                            <div style="margin-bottom: 15px;">
-                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Número de Mesas:</label>
-                                <input type="number" name="numeroMesas" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                            </div>
-
-
-
-                            <div style="margin-bottom: 15px;">
-                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Dirección:</label>
-                                <input type="text" name="direccion" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                            </div>
-
-                            <div style="margin-bottom: 15px;">
-                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Logo:</label>
-                                <input type="file" name="logo" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                            </div>
-
-                            <div style="display:flex;gap:10px;">
-                                <button type="submit" style="flex:1;padding:12px;background:#4CAF50;color:#fff;border:none;border-radius:5px;cursor:pointer;">
-                                <i class="fas fa-user-plus"></i> Registrar Restaurante
-                                </button>
-                                <button type="button" onclick="closeModal()" style="flex:1;padding:12px;background:#6c757d;color:#fff;border:none;border-radius:5px;cursor:pointer;">
-                                <i class="fas fa-times"></i> Cancelar
-                                </button>
-                            </div>
-                            </form>
-
-                    `
-                },
-
-                ActualizarDatosLocal: {
-                        title: '<i class="fas fa-edit"></i> Actualizar Local',
-                        content: `
-                        <form id="actualizarLocalForm" onsubmit="submitFormFile(event, 'actualizar_datos_local.php')">
-                                <div style="margin-bottom: 15px;">
-                                    <label style="display:block;margin-bottom:5px;font-weight:bold;">Nombre:</label>
-                                    <input type="text" name="nombre" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                                </div>
-
-                                <div style="margin-bottom: 15px;">
-                                    <label style="display:block;margin-bottom:5px;font-weight:bold;">Teléfono:</label>
-                                    <input type="tel" name="telefono" placeholder="Ej: 3001234567"
-                                        style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                                </div>
-
-                                <div style="margin-bottom: 15px;">
-                                    <label style="display:block;margin-bottom:5px;font-weight:bold;">Número de Mesas:</label>
-                                    <input type="number" name="numeroMesas" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                                </div>
-
-                                <div style="margin-bottom: 15px;">
-                                    <label style="display:block;margin-bottom:5px;font-weight:bold;">Dirección:</label>
-                                    <input type="text" name="direccion" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                                </div>
-
-                                <div style="margin-bottom: 15px;">
-                                    <label style="display:block;margin-bottom:5px;font-weight:bold;">Logo (opcional):</label>
-                                    <input type="file" name="logo" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                                    <small style="color:#555;">Si no seleccionas un logo, se mantendrá el actual</small>
-                                </div>
-
-                                <div style="display:flex;gap:10px;">
-                                    <button type="submit" style="flex:1;padding:12px;background:#007BFF;color:#fff;border:none;border-radius:5px;cursor:pointer;">
-                                    <i class="fas fa-save"></i> Actualizar Restaurante
-                                    </button>
-                                    <button type="button" onclick="closeModal()" style="flex:1;padding:12px;background:#6c757d;color:#fff;border:none;border-radius:5px;cursor:pointer;">
-                                    <i class="fas fa-times"></i> Cancelar
-                                    </button>
-                                </div>
-                            </form>
-                        `
-
-                },
-
-                registrarUsuario: {
-                    title: '<i class="fas fa-user-plus"></i> Registrar Usuario',
-                    content: `
-                       <form id="registrarUsuarioForm" onsubmit="submitForm(event, 'registrar_usuario.php')">
-                            <div style="margin-bottom: 15px;">
-                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Nombre:</label>
-                                <input type="text" name="nombre" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                            </div>
-
-                            <div style="margin-bottom: 15px;">
-                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Correo:</label>
-                                <input type="email" name="correo" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                            </div>
-
-                            <div style="margin-bottom: 15px;">
-                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Teléfono:</label>
-                                <input type="tel" name="telefono" " placeholder="Ej: 3001234567"
-                                    style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                            </div>
-
-                            <div style="margin-bottom: 15px;">
-                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Contraseña:</label>
-                                <input type="password" name="password" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                            </div>
-
-                            <div style="margin-bottom: 15px;">
-                                <label style="display:block;margin-bottom:5px;font-weight:bold;">Rol:</label>
-                                <select name="rol" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;">
-                                <option value="mesero">Mesero</option>
-                                <option value="administrador">Administrador</option>
-                                </select>
-                            </div>
-
-                            <div style="display:flex;gap:10px;">
-                                <button type="submit" style="flex:1;padding:12px;background:#4CAF50;color:#fff;border:none;border-radius:5px;cursor:pointer;">
-                                <i class="fas fa-user-plus"></i> Registrar Usuario
-                                </button>
-                                <button type="button" onclick="closeModal()" style="flex:1;padding:12px;background:#6c757d;color:#fff;border:none;border-radius:5px;cursor:pointer;">
-                                <i class="fas fa-times"></i> Cancelar
-                                </button>
-                            </div>
-                            </form>
-
-                    `
-                },
-                registrarCategoria: {
-                    title: '<i class="fas fa-tags"></i> Registrar Categoría',
-                    content: `
-                        <form id="registrarCategoriaForm" onsubmit="submitForm(event, 'registrar_categoria.php')">
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Nombre de Categoría:</label>
-                                <input type="text" name="nombre" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Descripción:</label>
-                                <textarea name="descripcion" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-height: 80px;"></textarea>
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Tipo:</label>
-                                <select name="tipo" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                                    <option value="comida">Comida</option>
-                                    <option value="bebida">Bebida</option>
-                                    <option value="postre">Postre</option>
-                                    <option value="entrada">Entrada</option>
-                                    <option value="plato_principal">Plato Principal</option>
-                                </select>
-                            </div>
-                            <div style="display: flex; gap: 10px;">
-                                <button type="submit" style="flex: 1; padding: 12px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                    <i class="fas fa-plus"></i> Crear Categoría
-                                </button>
-                                <button type="button" onclick="closeModal()" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                    <i class="fas fa-times"></i> Cancelar
-                                </button>
-                            </div>
-                        </form>
-                    `
-                },
-               ActualizarCategoria: {
-                        title: '<i class="fas fa-tags"></i> Actualizar Categoría',
-                        content: `
-                            <div style="text-align: center; padding: 20px;">
-                                <p>Para editar una categoría, haz clic en el botón de abajo:</p>
-                                <a href="pages/editar_categorias.html" style="display: inline-block; padding: 12px 20px; background: #2196F3; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                                    <i class="fas fa-edit"></i> Ir a Editar Categorías
-                                </a>
-                            </div>
-                        `
-                    },
-
-
-                registrarInsumo: {
-                    title: '<i class="fas fa-box"></i> Registrar Insumo',
-                    content: `
-                        <form id="registrarInsumoForm" onsubmit="submitForm(event, 'registrar_insumo.php')">
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Nombre del Producto:</label>
-                                <input type="text" name="nombre_producto" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Descripción:</label>
-                                <textarea name="descripcion" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; min-height: 60px;"></textarea>
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Cantidad:</label>
-                                <input type="number" name="cantidad" required min="0" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Precio:</label>
-                                <input type="number" name="precio" required min="0" step="0.01" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Unidad de Medida:</label>
-                                <select name="unidad" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                                    <option value="kg">Kilogramos</option>
-                                    <option value="g">Gramos</option>
-                                    <option value="l">Litros</option>
-                                    <option value="ml">Mililitros</option>
-                                    <option value="unidad">Unidades</option>
-                                    <option value="porcion">Porciones</option>
-                                </select>
-                            </div>
-                            <div style="display: flex; gap: 10px;">
-                                <button type="submit" style="flex: 1; padding: 12px; background: #FF9800; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                    <i class="fas fa-plus"></i> Agregar Insumo
-                                </button>
-                                <button type="button" onclick="closeModal()" style="flex: 1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                    <i class="fas fa-times"></i> Cancelar
-                                </button>
-                            </div>
-                        </form>
-                    `
-                }
-            };
-
-            if (forms[formType]) {
-                modalTitle.innerHTML = forms[formType].title;
-                modalContent.innerHTML = forms[formType].content;
-                modal.style.display = 'block';
-            }
-        }
-
-        function openDataView(phpFile) {
-            const modal = document.getElementById('moduleModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent');
-            
-            modalTitle.innerHTML = '<i class="fas fa-database"></i> Consultando Datos...';
-            modalContent.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #667eea; margin-bottom: 15px;"></i>
-                    <p>Cargando datos desde: <strong>${phpFile}</strong></p>
-                    <div style="margin-top: 20px;">
-                        <button onclick="executePhpFunction('${phpFile}')" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                            <i class="fas fa-play"></i> Ejecutar Consulta
-                        </button>
-                    </div>
-                </div>
-            `;
-            modal.style.display = 'block';
-        }
-
-        function submitForm(event, phpFile) {
-                    event.preventDefault();
-                    
-                    const formData = new FormData(event.target);
-                    const data = Object.fromEntries(formData.entries());
-                    
-                    // Mostrar en consola lo que se enviará
-                    console.log('Datos a enviar:', data);
-
-                    fetch(`api/${phpFile}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(data)
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error("Error en la respuesta del servidor");
-                        }
-                        return response.text(); // no esperamos JSON
-                    })
-                    .then(() => {
-                        showSuccess('Hecho ✅'); // Solo con que llegue bien
-                        closeModal();
-                    })
-                    .catch(error => {
-                        console.error("Error en submitForm:", error);
-                        showError('Error de conexión: ' + error.message);
-                    });
-                }
-
-        function submitFormFile(event, phpFile) {
-            event.preventDefault();
-            
-            const formData = new FormData(event.target); // aquí sí va el archivo logo
-            
-            // Mostrar en consola lo que se enviará (sin mostrar archivo completo)
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value);
-            }
-
-            fetch(`api/${phpFile}`, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Error en la respuesta del servidor");
-                }
-                return response.text(); // ya no esperamos JSON
-            })
-            .then(() => {
-                showSuccess('Hecho ✅');
-                closeModal();
-            })
-            .catch(error => {
-                console.error("Error en submitForm:", error);
-                showError('Error de conexión: ' + error.message);
-            });
-        }
+    </nav>
+    <div class="container mt-5">
+        <header class="hero-section">
+            <h1 class="display-4">Bienvenido a DMENUNET</h1>
+            <p class="lead">Simplifica la gestión de tu restaurante con nuestro sistema de menú digital y análisis de ventas.</p>
+        </header>
         
-        function cargarCategoriaParaEditar(categoria) {
-            document.getElementById("categoriaId").value = categoria.id;
-            document.getElementById("categoriaNombre").value = categoria.nombre;
-            document.getElementById("categoriaDescripcion").value = categoria.descripcion;
-            document.getElementById("categoriaTipo").value = categoria.tipo;
+        <section class="mb-5">
+            <h2 class="text-center mb-4">Funciones Principales</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card text-center p-4 h-100">
+                        <div class="card-body">
+                            <i class="bi bi-speedometer2" style="font-size: 3rem; color: #007bff;"></i>
+                            <h5 class="card-title mt-3">Dashboard de Ventas</h5>
+                            <p class="card-text">Analiza tus ventas con gráficos detallados para tomar decisiones informadas.</p>
+                            <a href="pages/dashboard.html" class="btn btn-primary mt-3">Ir al Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center p-4 h-100">
+                        <div class="card-body">
+                            <i class="bi bi-boxes" style="font-size: 3rem; color: #17a2b8;"></i>
+                            <h5 class="card-title mt-3">Inventario</h5>
+                            <p class="card-text">Gestiona tu inventario de forma eficiente y mantén un control de tus productos.</p>
+                            <a href="pages/inventario.html" class="btn btn-info mt-3 text-white">Gestionar Inventario</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center p-4 h-100">
+                        <div class="card-body">
+                            <i class="bi bi-receipt" style="font-size: 3rem; color: #28a745;"></i>
+                            <h5 class="card-title mt-3">Pedidos y Mesas</h5>
+                            <p class="card-text">Administra los pedidos y la ocupación de mesas de manera sencilla.</p>
+                            <a href="pages/mesas.html" class="btn btn-success mt-3">Ver Mesas y Pedidos</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-            // Abrir el modal de actualización
-            openModal('ActualizarCategoria');
-        }
+       
+    </div>
 
-
-        function executePhpFunction(phpFile) {
-            showInfo(`Ejecutando: ${phpFile}\n\nRuta completa: api/${phpFile}\n\nEn producción, esto se conectaría directamente con tu archivo PHP.`);
-        }
-
-        function showSuccess(message) {
-            showNotification(message, 'success');
-        }
-
-        function showError(message) {
-            showNotification(message, 'error');
-        }
-
-        function showInfo(message) {
-            showNotification(message, 'info');
-        }
-
-        function showNotification(message, type) {
-            const colors = {
-                success: '#4CAF50',
-                error: '#F44336',
-                info: '#2196F3'
-            };
-
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${colors[type]};
-                color: white;
-                padding: 15px 20px;
-                border-radius: 5px;
-                z-index: 10000;
-                max-width: 300px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                font-size: 14px;
-                line-height: 1.4;
-            `;
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 4000);
-        }
-
-        function closeModal() {
-            document.getElementById('moduleModal').style.display = 'none';
-        }
-
-        function quickAction(action) {
-            const actions = {
-                newOrder: () => openModal('ventas'),
-                viewTables: () => openModal('mesas'),
-                inventory: () => openModal('insumos'),
-                reports: () => openModal('reportes'),
-                settings: () => openModal('configuracion')
-            };
-
-            if (actions[action]) {
-                actions[action]();
-            }
-        }
-
-        // Cerrar modal
-        document.querySelector('.close').onclick = function() {
-            closeModal();
-        }
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('moduleModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        }
-
-        // Animación de entrada
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.module-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    card.style.transition = 'all 0.5s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
-            });
-        });
-    </script>
-    <script>
-function executePhpFunction(phpFile) {
-    fetch(`api/${phpFile}`)
-        .then(response => response.text())
-        .then(data => {
-            const modal = document.getElementById('moduleModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent');
-
-            modalTitle.innerHTML = `<i class="fas fa-database"></i> Resultado de ${phpFile}`;
-            modalContent.innerHTML = `
-                <pre style="background:#f9f9f9; padding:15px; border-radius:5px;
-                           max-height:400px; overflow:auto; white-space: pre-wrap;">
-                    ${data}
-                </pre>`;
-            modal.style.display = 'block';
-        })
-        .catch(error => {
-            showError('❌ Error ejecutando ' + phpFile + ': ' + error.message);
-        });
-}
-</script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
